@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PyQuest - Hành trình Python</title>
+  <meta name="description" content="Game RPG ôn tập Python dành cho học sinh">
+  <style>
+    :root {
+      --ink: #f7f4ff;
+      --muted: #b4b7d0;
+      --panel: rgba(21, 25, 51, .82);
+      --panel-strong: #191d3c;
+      --line: rgba(255, 255, 255, .13);
+      --violet: #8e73ff;
+      --violet-deep: #5d4bd7;
+      --gold: #ffc857;
+      --gold-soft: #ffe19a;
+      --mint: #63e6be;
+      --red: #ff6b7a;
+      --blue: #61b9ff;
+      --shadow: 0 24px 70px rgba(4, 6, 20, .42);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #0b0e24;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 5%, rgba(96, 83, 222, .28), transparent 28rem),
+        radial-gradient(circle at 85% 10%, rgba(214, 95, 141, .15), transparent 26rem),
+        linear-gradient(150deg, #0b0e24 0%, #141734 56%, #121b35 100%);
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    .app-shell { width: min(1280px, calc(100% - 36px)); margin: 0 auto; padding: 24px 0 36px; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      min-height: 62px; margin-bottom: 22px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      display: grid; place-items: center; width: 42px; height: 42px;
+      border: 1px solid rgba(255, 200, 87, .5); border-radius: 12px;
+      color: var(--gold); background: linear-gradient(145deg, #302a6a, #171a39);
+      box-shadow: 0 8px 28px rgba(117, 87, 231, .25);
+      font-size: 23px;
+    }
+    .brand strong { display: block; font-size: 15px; letter-spacing: .16em; }
+    .brand span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; letter-spacing: .05em; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .file-name { max-width: 290px; overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+    .file-name.loading { color: var(--gold-soft); }
+    .file-name.ready { color: var(--mint); }
+    .file-name.error { color: #ffabb3; }
+
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 42px; padding: 0 16px; border: 1px solid transparent; border-radius: 10px;
+      color: #fff; background: var(--violet-deep); box-shadow: 0 8px 18px rgba(75, 57, 174, .28);
+      font-weight: 750; transition: transform .18s ease, filter .18s ease, background .18s ease;
+    }
+    .button:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
+    .button.secondary { border-color: var(--line); background: rgba(255, 255, 255, .06); box-shadow: none; }
+    .button.gold { color: #27203c; background: var(--gold); box-shadow: 0 8px 18px rgba(255, 200, 87, .25); }
+    .button.large { min-height: 50px; padding: 0 23px; }
+    .button.icon { width: 42px; padding: 0; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .hero {
+      position: relative; overflow: hidden; display: grid; place-items: center;
+      min-height: calc(100vh - 175px); padding: 54px 28px; border: 1px solid var(--line); border-radius: 22px;
+      background: linear-gradient(145deg, rgba(27, 31, 70, .9), rgba(21, 25, 52, .76)); box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .hero::before, .hero::after { content: ""; position: absolute; border: 1px solid rgba(255, 200, 87, .18); border-radius: 50%; pointer-events: none; }
+    .hero::before { width: 550px; height: 550px; transform: translate(48%, -40%); }
+    .hero::after { width: 420px; height: 420px; transform: translate(-62%, 40%); border-color: rgba(99, 230, 190, .16); }
+    .hero-content { position: relative; z-index: 1; width: min(660px, 100%); }
+    .eyebrow { margin: 0 0 14px; color: var(--gold); font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(38px, 7vw, 72px); line-height: .98; letter-spacing: -.045em; }
+    .hero h1 span { color: var(--gold); }
+    .hero-copy { max-width: 560px; margin: 22px auto 30px; color: var(--muted); line-height: 1.7; }
+    .start-card { width: min(460px, 100%); margin: 0 auto; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: rgba(9, 12, 30, .46); text-align: left; }
+    .field-label { display: block; margin-bottom: 8px; color: var(--gold-soft); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .text-input {
+      width: 100%; height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: 9px;
+      outline: none; color: var(--ink); background: rgba(255, 255, 255, .07); transition: border .18s ease, box-shadow .18s ease;
+    }
+    .text-input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(142, 115, 255, .18); }
+    .start-card .button { width: 100%; margin-top: 14px; }
+    .small-note { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .small-note strong { color: var(--gold-soft); }
+    .load-note { min-height: 18px; margin: 12px 0 0; color: var(--muted); font-size: 12px; }
+    .load-note.ready { color: var(--mint); }
+    .load-note.error { color: #ffabb3; }
+
+    .hud { display: grid; grid-template-columns: 1.05fr 1.2fr .7fr; gap: 12px; margin-bottom: 15px; }
+    .hud-card { min-height: 78px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); box-shadow: 0 12px 28px rgba(4, 6, 20, .16); }
+    .hud-label { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .hud-value { margin-top: 7px; font-size: 18px; font-weight: 800; }
+    .hud-value.gold { color: var(--gold); }
+    .progress { height: 9px; margin-top: 10px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, .1); }
+    .progress-bar { width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--mint), #baffea); transition: width .35s ease; }
+    .progress-bar.enemy { background: linear-gradient(90deg, var(--red), #ffb083); }
+    .progress-bar.boss { background: linear-gradient(90deg, #c457ff, #ff8cb7); }
+
+    .game-layout { display: block; }
+    .arena, .question-panel, .leaderboard-panel { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); box-shadow: var(--shadow); }
+    .arena { min-height: 570px; padding: 22px; background: linear-gradient(175deg, rgba(32, 38, 77, .9), rgba(19, 24, 48, .86)); }
+    .arena-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .area-kicker { margin: 0 0 6px; color: var(--gold); font-size: 12px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .area-title { margin: 0; font-size: clamp(22px, 3vw, 31px); letter-spacing: -.025em; }
+    .stage-count { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .scene { position: relative; display: grid; place-items: center; min-height: 490px; margin: 18px 0 0; overflow: hidden; border: 1px solid rgba(255, 255, 255, .1); border-radius: 14px; background: radial-gradient(circle at 50% 40%, rgba(142, 115, 255, .23), transparent 22%), linear-gradient(160deg, #16264a 0%, #271d48 56%, #371d3a 100%); transition: background .7s ease, box-shadow .7s ease; }
+    .scene.stage-forest { background: radial-gradient(circle at 48% 30%, rgba(99, 230, 190, .24), transparent 23%), linear-gradient(160deg, #123d49 0%, #174c48 48%, #172b3e 100%); }
+    .scene.stage-cave { background: radial-gradient(circle at 51% 31%, rgba(142, 115, 255, .3), transparent 22%), linear-gradient(160deg, #1b204d 0%, #32214f 48%, #17182f 100%); }
+    .scene.stage-valley { background: radial-gradient(circle at 53% 28%, rgba(255, 200, 87, .22), transparent 24%), linear-gradient(160deg, #24455a 0%, #375268 44%, #392b49 100%); }
+    .scene.stage-castle { background: radial-gradient(circle at 52% 30%, rgba(255, 107, 122, .25), transparent 21%), linear-gradient(160deg, #301f48 0%, #3a204d 48%, #17172e 100%); }
+    .scene-transition { animation: sceneReveal .7s ease both; }
+    .scene::before { content: ""; position: absolute; inset: auto 0 0; height: 44%; background: linear-gradient(0deg, rgba(3, 7, 20, .62), transparent); }
+    .stars { position: absolute; inset: 0; opacity: .58; background-image: radial-gradient(circle, rgba(255, 255, 255, .8) 0 1px, transparent 1px); background-size: 58px 47px; }
+    .road { position: absolute; right: 7%; bottom: 0; left: 7%; height: 35%; opacity: .62; background: linear-gradient(169deg, transparent 0 43%, rgba(232, 198, 135, .3) 44% 72%, rgba(103, 67, 65, .34) 73%); clip-path: polygon(29% 0, 70% 0, 100% 100%, 0 100%); }
+    .scene-stage-name { position: absolute; z-index: 2; top: 23px; left: 27px; color: rgba(255, 255, 255, .7); font-size: 11px; font-weight: 850; letter-spacing: .2em; text-transform: uppercase; }
+    .travel-banner { position: absolute; z-index: 3; top: 20px; right: 22px; display: flex; align-items: center; gap: 10px; max-width: 330px; padding: 10px 13px; border: 1px solid rgba(255, 255, 255, .18); border-radius: 11px; background: rgba(7, 10, 28, .48); backdrop-filter: blur(8px); }
+    .travel-banner-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; color: var(--gold); background: rgba(255, 200, 87, .13); font-size: 16px; }
+    .travel-banner p { margin: 0; color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    .travel-banner strong { display: block; margin-top: 3px; font-size: 12px; }
+    .travel-banner.battle { border-color: rgba(255, 200, 87, .35); }
+    .travel-banner.hidden { opacity: 0; transform: translateY(-8px); pointer-events: none; }
+    .battle-side { position: absolute; z-index: 1; bottom: 38px; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 42%; }
+    .battle-side.player-side { left: 3%; }
+    .battle-side.enemy-side { right: 3%; }
+    .battle-side.enemy-side { transition: opacity .35s ease, transform .35s ease; }
+    .scene.traveling .enemy-side { opacity: 0; transform: translateX(90px) scale(.9); pointer-events: none; }
+    .scene.traveling .player-side { animation: journeyMove 1.8s ease-in-out infinite alternate; }
+    .scene.battle-ready .player-side { animation: playerArrive .55s ease both; }
+    .character { display: grid; place-items: center; width: 140px; height: 140px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .17); font-size: 66px; filter: drop-shadow(0 18px 22px rgba(0, 0, 0, .32)); transition: transform .2s ease, opacity .3s ease; }
+    .character.player { background: radial-gradient(circle at 32% 27%, #77f1cd, #287f9c 58%, #16445c); }
+    .character.enemy { background: radial-gradient(circle at 35% 23%, #ffb57d, #a14671 55%, #4a2052); }
+    .character.boss { width: 174px; height: 174px; font-size: 85px; background: radial-gradient(circle at 35% 23%, #ffa4e0, #773d9d 55%, #2b2056); }
+    .character.idle { animation: idleFloat 2.8s ease-in-out infinite; }
+    .character.walk { animation: walkBob .42s ease-in-out infinite alternate; }
+    .character.hurt { animation: hurt .48s ease; }
+    .character.attack { animation: attack .48s ease; }
+    .character.defeat { animation: defeat .72s ease forwards; }
+    .character.hit { animation: hurt .42s ease; }
+    @keyframes hit { 30% { transform: translateX(-13px) rotate(-4deg); filter: drop-shadow(0 0 18px var(--red)); } 65% { transform: translateX(9px); } }
+    @keyframes attack { 40% { transform: translateX(24px) scale(1.05); } 70% { transform: translateX(-4px); } }
+    @keyframes idleFloat { 50% { transform: translateY(-5px); } }
+    @keyframes walkBob { 50% { transform: translateY(-8px) rotate(-3deg); } }
+    @keyframes hurt { 20%, 60% { transform: translateX(-11px); filter: drop-shadow(0 0 20px var(--red)); } 40%, 80% { transform: translateX(10px); } }
+    @keyframes defeat { 45% { transform: translateY(-17px) rotate(8deg); } 100% { opacity: 0; transform: translateY(28px) rotate(20deg) scale(.55); } }
+    @keyframes journeyMove { from { transform: translateX(-5%); } to { transform: translateX(105%); } }
+    @keyframes playerArrive { from { transform: translateX(105%) scale(.9); } to { transform: translateX(0) scale(1); } }
+    @keyframes sceneReveal { from { opacity: .3; transform: scale(1.015); } to { opacity: 1; transform: scale(1); } }
+    .battle-name { color: var(--ink); font-size: 13px; font-weight: 800; }
+    .battle-hp { width: min(180px, 100%); }
+    .battle-hp .progress { height: 8px; margin-top: 0; }
+    .vs { position: absolute; z-index: 1; top: 45%; color: rgba(255, 255, 255, .25); font-size: 22px; font-weight: 900; letter-spacing: .22em; }
+    .combat-log { position: absolute; z-index: 2; right: 14px; bottom: 13px; left: 14px; min-height: 32px; color: var(--gold-soft); font-size: 12px; text-align: center; }
+    .damage-text { position: absolute; z-index: 5; color: var(--gold); font-size: 26px; font-weight: 950; text-shadow: 0 3px 0 rgba(59, 26, 66, .8); pointer-events: none; animation: damageRise .9s ease-out forwards; }
+    .damage-text.player-damage { color: #ffabb3; }
+    @keyframes damageRise { from { opacity: 0; transform: translateY(12px) scale(.8); } 18% { opacity: 1; } to { opacity: 0; transform: translateY(-76px) scale(1.14); } }
+    .reward-pop { position: absolute; z-index: 5; top: 50%; left: 50%; color: var(--gold); font-size: 21px; font-weight: 900; pointer-events: none; animation: rewardPop 1s ease-out forwards; }
+    @keyframes rewardPop { from { opacity: 0; transform: translate(-50%, 15px) scale(.7); } 18% { opacity: 1; } to { opacity: 0; transform: translate(-50%, -65px) scale(1.08); } }
+    .question-panel { margin-top: 15px; padding: 22px; background: linear-gradient(145deg, rgba(29, 34, 73, .94), rgba(17, 21, 44, .9)); }
+    .question-panel.traveling { border-color: rgba(99, 230, 190, .2); }
+    .question-panel.traveling .question-content-wrap { opacity: .75; }
+    .question-content-wrap { transition: opacity .3s ease; }
+    .question-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+    .question-header h2 { margin: 0; font-size: 18px; }
+    .question-number { color: var(--muted); font-size: 12px; }
+    .question-text { margin: 0 0 18px; white-space: pre-wrap; color: #fff; font-size: 17px; font-weight: 650; line-height: 1.55; }
+    .answers { display: grid; gap: 10px; }
+    .answer-option { display: flex; gap: 11px; align-items: flex-start; width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: rgba(255, 255, 255, .045); text-align: left; transition: border .18s ease, background .18s ease, transform .18s ease; }
+    .answer-option:hover:not(:disabled) { border-color: var(--violet); background: rgba(142, 115, 255, .12); transform: translateX(2px); }
+    .answer-option.selected { border-color: var(--gold); background: rgba(255, 200, 87, .14); }
+    .answer-option.correct { border-color: var(--mint); background: rgba(99, 230, 190, .14); }
+    .answer-option.wrong { border-color: var(--red); background: rgba(255, 107, 122, .14); }
+    .choice-letter { display: grid; place-items: center; flex: 0 0 25px; width: 25px; height: 25px; border-radius: 7px; color: var(--gold); background: rgba(255, 200, 87, .14); font-size: 12px; font-weight: 850; }
+    .answer-option span:last-child { line-height: 1.4; }
+    .fill-label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 12px; }
+    .feedback { min-height: 42px; margin: 16px 0 0; padding: 10px 12px; border-radius: 9px; background: rgba(255, 255, 255, .05); color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .feedback.good { color: var(--mint); background: rgba(99, 230, 190, .1); }
+    .feedback.bad { color: #ffabb3; background: rgba(255, 107, 122, .1); }
+    .question-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 14px; }
+    .empty-question { padding: 34px 10px; color: var(--muted); text-align: center; line-height: 1.6; }
+    .empty-question strong { display: block; margin-bottom: 6px; color: var(--gold-soft); }
+
+    .results-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 15px; align-items: start; }
+    .result-card, .leaderboard-panel { padding: 25px; }
+    .result-card { border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(150deg, rgba(46, 43, 97, .92), rgba(20, 25, 52, .9)); box-shadow: var(--shadow); }
+    .result-badge { display: grid; place-items: center; width: 72px; height: 72px; margin-bottom: 18px; border: 1px solid rgba(255, 200, 87, .35); border-radius: 22px; color: var(--gold); background: rgba(255, 200, 87, .12); font-size: 36px; }
+    .result-card h2 { margin: 0 0 8px; font-size: 30px; }
+    .result-card p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .score-big { margin: 26px 0; color: var(--gold); font-size: 52px; font-weight: 900; letter-spacing: -.05em; }
+    .score-big small { color: var(--muted); font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+    .stat-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 20px; }
+    .stat-item { padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255, 255, 255, .04); }
+    .stat-item span { display: block; color: var(--muted); font-size: 11px; }
+    .stat-item strong { display: block; margin-top: 4px; font-size: 19px; }
+    .leaderboard-panel h2 { margin: 0; font-size: 21px; }
+    .leaderboard-caption { margin: 7px 0 17px; color: var(--muted); font-size: 12px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 520px; }
+    th, td { padding: 11px 9px; border-bottom: 1px solid var(--line); font-size: 12px; text-align: left; }
+    th { color: var(--muted); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+    td:first-child { color: var(--gold); font-weight: 850; }
+    td:nth-child(3) { color: var(--gold-soft); font-weight: 800; }
+    .empty-leaderboard { padding: 24px 4px; color: var(--muted); text-align: center; }
+    .result-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+    .result-actions .button { flex: 1 1 160px; }
+    .confetti { position: fixed; z-index: 30; inset: 0; overflow: hidden; pointer-events: none; }
+    .confetti-piece { position: absolute; top: -18px; width: 9px; height: 16px; border-radius: 2px; animation: confettiFall 2.7s cubic-bezier(.2, .7, .4, 1) forwards; }
+    @keyframes confettiFall { to { opacity: 0; transform: translate3d(var(--drift), 108vh, 0) rotate(720deg); } }
+
+    .toast { position: fixed; z-index: 20; right: 20px; bottom: 20px; max-width: min(380px, calc(100% - 40px)); padding: 13px 15px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: #252b55; box-shadow: var(--shadow); transform: translateY(20px); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; font-size: 13px; line-height: 1.4; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { border-color: rgba(255, 107, 122, .5); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+    @media (max-width: 860px) {
+      .game-layout, .results-grid { grid-template-columns: 1fr; }
+      .arena { min-height: auto; }
+      .scene { min-height: 410px; }
+      .results-grid .leaderboard-panel { order: 2; }
+    }
+    @media (max-width: 620px) {
+      .app-shell { width: min(100% - 22px, 1280px); padding-top: 14px; }
+      .topbar { align-items: flex-start; }
+      .brand span { display: none; }
+      .top-actions { flex-wrap: wrap; justify-content: flex-end; }
+      .file-name { display: none; }
+      .hero { min-height: calc(100vh - 125px); padding: 34px 16px; }
+      .hero-copy { font-size: 14px; }
+      .hud { grid-template-columns: 1fr 1fr; }
+      .hud-card:first-child { grid-column: 1 / -1; }
+      .arena, .question-panel, .result-card, .leaderboard-panel { padding: 16px; }
+      .scene { min-height: 350px; }
+      .character { width: 105px; height: 105px; font-size: 52px; }
+      .character.boss { width: 132px; height: 132px; font-size: 66px; }
+      .battle-side { bottom: 38px; width: 46%; }
+      .battle-side.player-side { left: 0; }
+      .battle-side.enemy-side { right: 0; }
+      .area-title { font-size: 24px; }
+      .score-big { font-size: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="PyQuest">
+        <div class="brand-mark" aria-hidden="true">⌘</div>
+        <div><strong>PYQUEST</strong><span>HÀNH TRÌNH ÔN TẬP PYTHON</span></div>
+      </div>
+      <div class="top-actions">
+        <span id="fileName" class="file-name loading">Đang tải questions/k40.txt…</span>
+      </div>
+    </header>
+
+    <main>
+      <section id="startScreen" class="screen active" aria-labelledby="startTitle">
+        <div class="hero">
+          <div class="hero-content">
+            <p class="eyebrow">Adventure mode · Python fundamentals</p>
+            <h1 id="startTitle">Đánh thức <span>mã nguồn</span>.</h1>
+            <p class="hero-copy">Vượt qua bốn vùng đất, trả lời câu hỏi Python và hạ gục quái vật bằng kiến thức của bạn. Mỗi câu trả lời đúng là một đòn tấn công.</p>
+            <div class="start-card">
+              <label class="field-label" for="playerName">Tên người chơi</label>
+              <input id="playerName" class="text-input" type="text" maxlength="24" placeholder="Nhập tên của bạn" autocomplete="name">
+              <button id="startButton" class="button gold large" type="button">Bắt đầu cuộc phiêu lưu&nbsp; →</button>
+              <p class="small-note"><strong>Bộ câu hỏi:</strong> game tự động đọc `questions/k40.txt` khi mở trang.</p>
+              <p id="loadNote" class="load-note" role="status">Đang kết nối tới kho câu hỏi…</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="screen" aria-label="Khu vực chiến đấu">
+        <div class="hud">
+          <div class="hud-card">
+            <div class="hud-label"><span id="playerHudName">Người chơi</span><span id="playerHpText">100 / 100 HP</span></div>
+            <div class="progress" aria-label="Máu người chơi"><div id="playerHpBar" class="progress-bar"></div></div>
+          </div>
+          <div class="hud-card">
+            <div class="hud-label"><span>Tiến độ hành trình</span><span id="progressText">Khu 1 / 4</span></div>
+            <div class="progress"><div id="stageProgressBar" class="progress-bar" style="width: 25%"></div></div>
+          </div>
+          <div class="hud-card">
+            <div class="hud-label"><span>Điểm</span><span id="questionStats">0 đúng · 0 sai</span></div>
+            <div id="scoreText" class="hud-value gold">0 XP</div>
+          </div>
+        </div>
+
+        <div class="game-layout">
+          <article class="arena">
+            <div class="arena-header">
+              <div><p id="areaKicker" class="area-kicker">Khu vực 01</p><h2 id="areaTitle" class="area-title">Thung lũng Code</h2></div>
+              <div id="stageCount" class="stage-count">Kẻ địch 1 / 4</div>
+            </div>
+            <div id="scene" class="scene stage-forest traveling scene-transition">
+              <div class="stars" aria-hidden="true"></div>
+              <div class="road" aria-hidden="true"></div>
+              <div class="scene-stage-name" id="sceneStageName">Rừng khởi hành</div>
+              <div id="travelBanner" class="travel-banner">
+                <div id="travelBannerIcon" class="travel-banner-icon" aria-hidden="true">➜</div>
+                <div><p id="travelLabel">Đang phiêu lưu</p><strong id="travelMessage">Nhân vật đang tiến vào khu vực mới…</strong></div>
+              </div>
+              <div class="battle-side player-side">
+                <div id="playerCharacter" class="character player idle" aria-label="Nhân vật người chơi">🧙</div>
+                <div id="battlePlayerName" class="battle-name">Người chơi</div>
+                <div class="battle-hp"><div class="progress"><div id="scenePlayerHpBar" class="progress-bar"></div></div></div>
+              </div>
+              <div class="vs" aria-hidden="true">VS</div>
+              <div class="battle-side enemy-side">
+                <div id="enemyCharacter" class="character enemy idle" aria-label="Quái vật">👾</div>
+                <div id="enemyName" class="battle-name">Bug Goblin</div>
+                <div class="battle-hp"><div class="progress"><div id="enemyHpBar" class="progress-bar enemy"></div></div></div>
+              </div>
+              <div id="combatLog" class="combat-log" aria-live="polite">Đánh bại quái vật bằng câu trả lời đúng.</div>
+            </div>
+          </article>
+
+          <article id="questionPanel" class="question-panel" aria-live="polite">
+            <div class="question-header"><h2>Thử thách Python</h2><span id="questionNumber" class="question-number">Câu 1</span></div>
+            <div id="questionContent"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="resultScreen" class="screen" aria-labelledby="resultTitle">
+        <div id="confetti" class="confetti" aria-hidden="true"></div>
+        <div class="results-grid">
+          <article class="result-card">
+            <div class="result-badge" aria-hidden="true">✦</div>
+            <p class="eyebrow">Adventure complete</p>
+            <h2 id="resultTitle">Hành trình đã hoàn tất!</h2>
+            <p id="resultMessage">Bạn đã chứng minh khả năng đọc hiểu Python.</p>
+            <div id="finalScore" class="score-big">0 <small>XP</small></div>
+            <div class="stat-list">
+              <div class="stat-item"><span>Người chơi</span><strong id="finalName">-</strong></div>
+              <div class="stat-item"><span>Độ chính xác</span><strong id="finalAccuracy">0%</strong></div>
+              <div class="stat-item"><span>Câu đúng</span><strong id="finalCorrect">0</strong></div>
+              <div class="stat-item"><span>Câu sai</span><strong id="finalWrong">0</strong></div>
+            </div>
+            <div class="result-actions"><button id="playAgainButton" class="button gold" type="button">↻ Chơi lại</button><button id="newPlayerButton" class="button secondary" type="button">Đổi người chơi</button></div>
+          </article>
+          <article class="leaderboard-panel">
+            <h2>Bảng xếp hạng</h2>
+            <p class="leaderboard-caption">Top 10 thành tích được lưu trên thiết bị này.</p>
+            <div id="leaderboardContent"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const STORAGE_KEY = 'pyquest_leaderboard_v1';
+      const QUESTION_PATH = 'questions/k40.txt';
+      const MAX_PLAYER_HP = 100;
+      const DAMAGE_TO_ENEMY = 20;
+      const DAMAGE_TO_PLAYER = 15;
+      const stages = [
+        { kicker: 'Khu vực 01', name: 'Rừng Sương Mã', scene: 'forest', travelIcon: '🌲', enemy: 'Bug Goblin', icon: '👾', hp: 40 },
+        { kicker: 'Khu vực 02', name: 'Hang động Vòng lặp', scene: 'cave', travelIcon: '🕯️', enemy: 'Loop Wraith', icon: '🦇', hp: 60 },
+        { kicker: 'Khu vực 03', name: 'Thung lũng Hàm', scene: 'valley', travelIcon: '🏞️', enemy: 'Function Golem', icon: '🗿', hp: 80 },
+        { kicker: 'Khu vực 04 · BOSS', name: 'Lâu đài Byte', scene: 'castle', travelIcon: '🏰', enemy: 'Byte Dragon', icon: '🐉', hp: 150, boss: true }
+      ];
+
+      const state = {
+        questions: [], currentQuestion: null, questionOrder: [], questionIndex: 0,
+        playerName: '', playerHp: MAX_PLAYER_HP, score: 0, correct: 0, wrong: 0,
+        stageIndex: 0, enemyHp: 0, answered: false, gameRunning: false,
+        mode: 'loading', questionError: '', travelTimer: null
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const els = {
+        startScreen: $('startScreen'), gameScreen: $('gameScreen'), resultScreen: $('resultScreen'),
+        fileName: $('fileName'), loadNote: $('loadNote'), playerName: $('playerName'), startButton: $('startButton'),
+        playerHudName: $('playerHudName'), playerHpText: $('playerHpText'), playerHpBar: $('playerHpBar'), scenePlayerHpBar: $('scenePlayerHpBar'),
+        progressText: $('progressText'), stageProgressBar: $('stageProgressBar'), scoreText: $('scoreText'), questionStats: $('questionStats'),
+        areaKicker: $('areaKicker'), areaTitle: $('areaTitle'), stageCount: $('stageCount'), scene: $('scene'), sceneStageName: $('sceneStageName'),
+        travelBanner: $('travelBanner'), travelBannerIcon: $('travelBannerIcon'), travelLabel: $('travelLabel'), travelMessage: $('travelMessage'),
+        playerCharacter: $('playerCharacter'), battlePlayerName: $('battlePlayerName'), enemyCharacter: $('enemyCharacter'), enemyName: $('enemyName'),
+        enemyHpBar: $('enemyHpBar'), combatLog: $('combatLog'), questionNumber: $('questionNumber'), questionPanel: $('questionPanel'), questionContent: $('questionContent'),
+        finalName: $('finalName'), finalScore: $('finalScore'), finalAccuracy: $('finalAccuracy'), finalCorrect: $('finalCorrect'), finalWrong: $('finalWrong'), resultMessage: $('resultMessage'),
+        leaderboardContent: $('leaderboardContent'), playAgainButton: $('playAgainButton'), newPlayerButton: $('newPlayerButton'), confetti: $('confetti'), toast: $('toast')
+      };
+
+      function showScreen(screen) {
+        [els.startScreen, els.gameScreen, els.resultScreen].forEach((item) => item.classList.remove('active'));
+        screen.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      let toastTimer;
+      function showToast(message, isError = false) {
+        clearTimeout(toastTimer);
+        els.toast.textContent = message;
+        els.toast.className = `toast show${isError ? ' error' : ''}`;
+        toastTimer = setTimeout(() => { els.toast.className = 'toast'; }, 3800);
+      }
+
+      function setLoadStatus(message, status = '') {
+        els.fileName.textContent = message;
+        els.fileName.className = `file-name ${status}`;
+        els.loadNote.textContent = message;
+        els.loadNote.className = `load-note ${status}`;
+      }
+
+      function createQuestionId() {
+        return (window.crypto && typeof window.crypto.randomUUID === 'function')
+          ? window.crypto.randomUUID()
+          : `q-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
+
+      function cleanQuestion(item) {
+        if (!item || !item.type || !item.question || item.answer === undefined) return null;
+        const type = String(item.type).trim().toLowerCase();
+        if (!['multiple_choice', 'fill_blank'].includes(type)) return null;
+        const question = String(item.question).trim();
+        const answer = String(item.answer).trim();
+        if (!question || !answer) return null;
+        if (type === 'multiple_choice') {
+          const choices = ['A', 'B', 'C', 'D'].map((letter) => String(item[letter] ?? '').trim());
+          if (choices.some((choice) => !choice)) return null;
+          const normalizedAnswer = answer.toUpperCase();
+          if (!['A', 'B', 'C', 'D'].includes(normalizedAnswer)) return null;
+          return { id: String(item.id || createQuestionId()), type, question, choices, answer: normalizedAnswer };
+        }
+        return { id: String(item.id || createQuestionId()), type, question, choices: [], answer };
+      }
+
+      function parseTxt(text) {
+        const blocks = text.split(/---QUESTION---/i).slice(1);
+        return blocks.map((raw) => {
+          const block = raw.split(/---END---/i)[0];
+          const lines = block.replace(/^\s+|\s+$/g, '').split(/\r?\n/);
+          const item = { question: '', A: '', B: '', C: '', D: '' };
+          let questionMode = false;
+          const questionLines = [];
+          lines.forEach((line) => {
+            const match = line.match(/^\s*(id|type|answer|A|B|C|D)\s*:\s*(.*)\s*$/i);
+            if (match) {
+              const key = match[1].toLowerCase();
+              const value = match[2];
+              questionMode = false;
+              if (key === 'id' || key === 'type' || key === 'answer') item[key] = value;
+              else item[key.toUpperCase()] = value;
+            } else if (/^\s*question\s*:/i.test(line)) {
+              const inlineQuestion = line.replace(/^\s*question\s*:\s*/i, '');
+              questionMode = !inlineQuestion;
+              if (inlineQuestion) questionLines.push(inlineQuestion);
+            } else if (questionMode) {
+              questionLines.push(line);
+            }
+          });
+          item.question = questionLines.join('\n').trim();
+          return cleanQuestion(item);
+        }).filter(Boolean);
+      }
+
+      async function loadQuestions() {
+        setLoadStatus(`Đang tải ${QUESTION_PATH}…`, 'loading');
+        try {
+          const response = await fetch(QUESTION_PATH, { cache: 'no-store' });
+          if (!response.ok) throw new Error(`Không tìm thấy ${QUESTION_PATH} (HTTP ${response.status}).`);
+          const text = await response.text();
+          const questions = parseTxt(text);
+          if (!questions.length) throw new Error(`${QUESTION_PATH} không có câu hỏi hợp lệ.`);
+          state.questions = questions;
+          state.questionError = '';
+          els.startButton.disabled = false;
+          setLoadStatus(`Đã tải ${QUESTION_PATH} · ${questions.length} câu`, 'ready');
+        } catch (error) {
+          state.questions = [];
+          state.questionError = error.message;
+          els.startButton.disabled = false;
+          setLoadStatus(`${error.message} Hãy kiểm tra file và chạy bằng HTTP.`, 'error');
+          showToast(`Không thể tải câu hỏi: ${error.message}`, true);
+        }
+      }
+
+      function shuffle(items) {
+        const copy = [...items];
+        for (let i = copy.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [copy[i], copy[j]] = [copy[j], copy[i]]; }
+        return copy;
+      }
+
+      function resetCharacterClasses() {
+        [els.playerCharacter, els.enemyCharacter].forEach((element) => {
+          element.classList.remove('attack', 'hurt', 'hit', 'defeat', 'walk');
+          element.classList.add('idle');
+        });
+      }
+
+      function setSceneMode(mode) {
+        const stage = stages[state.stageIndex];
+        els.scene.className = `scene stage-${stage.scene} ${mode === 'travel' ? 'traveling' : 'battle-ready scene-transition'}`;
+        if (mode === 'battle') {
+          void els.scene.offsetWidth;
+          els.scene.classList.add('scene-transition');
+        }
+      }
+
+      function renderTravelPanel() {
+        els.questionNumber.textContent = 'Đang di chuyển';
+        els.questionContent.innerHTML = '<div class="empty-question"><strong>Hãy sẵn sàng!</strong>Nhân vật đang băng qua con đường. Quái vật sẽ xuất hiện ngay sau đây.</div>';
+      }
+
+      function beginTravel() {
+        clearTimeout(state.travelTimer);
+        state.mode = 'travel';
+        resetCharacterClasses();
+        els.playerCharacter.classList.remove('idle');
+        els.playerCharacter.classList.add('walk');
+        setSceneMode('travel');
+        els.travelBanner.classList.remove('hidden', 'battle');
+        els.travelBannerIcon.textContent = stages[state.stageIndex].travelIcon;
+        els.travelLabel.textContent = 'Đang phiêu lưu';
+        els.travelMessage.textContent = `Đang tiến vào ${stages[state.stageIndex].name}…`;
+        els.questionPanel.classList.add('traveling');
+        renderTravelPanel();
+        const stageAtStart = state.stageIndex;
+        state.travelTimer = setTimeout(() => {
+          if (state.gameRunning && state.stageIndex === stageAtStart) enterBattle();
+        }, 1850);
+      }
+
+      function enterBattle() {
+        state.mode = 'battle';
+        resetCharacterClasses();
+        setSceneMode('battle');
+        els.travelBanner.classList.remove('hidden');
+        els.travelBanner.classList.add('battle');
+        els.travelBannerIcon.textContent = '⚔';
+        els.travelLabel.textContent = stages[state.stageIndex].boss ? 'BOSS BATTLE' : 'Chạm trán';
+        els.travelMessage.textContent = `${stages[state.stageIndex].enemy} chắn đường!`;
+        els.questionPanel.classList.remove('traveling');
+        getNextQuestion();
+      }
+
+      function startGame() {
+        const name = els.playerName.value.trim();
+        if (!state.questions.length) { showToast(state.questionError || `Chưa có câu hỏi. Kiểm tra ${QUESTION_PATH}.`, true); return; }
+        if (!name) { els.playerName.focus(); showToast('Hãy nhập tên người chơi để bắt đầu.', true); return; }
+        state.playerName = name;
+        state.playerHp = MAX_PLAYER_HP; state.score = 0; state.correct = 0; state.wrong = 0; state.stageIndex = 0;
+        state.questionOrder = shuffle(state.questions); state.questionIndex = 0; state.gameRunning = true;
+        showScreen(els.gameScreen); setupStage();
+      }
+
+      function setupStage() {
+        const stage = stages[state.stageIndex];
+        state.enemyHp = stage.hp;
+        els.areaKicker.textContent = stage.kicker;
+        els.areaTitle.textContent = stage.name;
+        els.sceneStageName.textContent = stage.name;
+        els.stageCount.textContent = `${stage.boss ? 'BOSS' : 'Kẻ địch'} · ${state.stageIndex + 1} / ${stages.length}`;
+        els.enemyName.textContent = stage.enemy;
+        els.enemyCharacter.textContent = stage.icon;
+        els.enemyCharacter.classList.toggle('boss', Boolean(stage.boss));
+        els.playerHudName.textContent = state.playerName;
+        els.battlePlayerName.textContent = state.playerName;
+        els.progressText.textContent = `Khu ${state.stageIndex + 1} / ${stages.length}`;
+        els.stageProgressBar.style.width = `${((state.stageIndex + 1) / stages.length) * 100}%`;
+        els.enemyHpBar.classList.toggle('boss', Boolean(stage.boss));
+        els.combatLog.textContent = stage.boss ? 'Byte Dragon xuất hiện. Đây là trận chiến cuối cùng!' : 'Băng qua khu vực và chuẩn bị đối đầu quái vật.';
+        updateHud();
+        beginTravel();
+      }
+
+      function updateHud() {
+        const playerPercent = Math.max(0, state.playerHp / MAX_PLAYER_HP * 100);
+        const enemyPercent = Math.max(0, state.enemyHp / stages[state.stageIndex].hp * 100);
+        els.playerHpText.textContent = `${state.playerHp} / ${MAX_PLAYER_HP} HP`;
+        els.playerHpBar.style.width = `${playerPercent}%`; els.scenePlayerHpBar.style.width = `${playerPercent}%`;
+        els.enemyHpBar.style.width = `${enemyPercent}%`;
+        els.scoreText.textContent = `${state.score} XP`;
+        els.questionStats.textContent = `${state.correct} đúng · ${state.wrong} sai`;
+      }
+
+      function getNextQuestion() {
+        if (!state.gameRunning || state.mode !== 'battle') return;
+        if (!state.questionOrder.length || state.questionIndex >= state.questionOrder.length) {
+          state.questionOrder = shuffle(state.questions);
+          state.questionIndex = 0;
+        }
+        state.currentQuestion = state.questionOrder[state.questionIndex];
+        state.questionIndex += 1;
+        state.answered = false;
+        renderQuestion();
+      }
+
+      function renderQuestion() {
+        const question = state.currentQuestion;
+        if (!question) return;
+        els.questionNumber.textContent = `Câu ${state.questionIndex}`;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'question-content-wrap';
+        const questionText = document.createElement('p');
+        questionText.className = 'question-text'; questionText.textContent = question.question; wrapper.appendChild(questionText);
+        if (question.type === 'multiple_choice') {
+          const answers = document.createElement('div'); answers.className = 'answers';
+          question.choices.forEach((choice, index) => {
+            const letter = ['A', 'B', 'C', 'D'][index];
+            const button = document.createElement('button'); button.type = 'button'; button.className = 'answer-option'; button.dataset.answer = letter;
+            button.innerHTML = `<span class="choice-letter">${letter}</span><span></span>`; button.querySelector('span:last-child').textContent = choice;
+            button.addEventListener('click', () => { if (state.answered) return; answers.querySelectorAll('.answer-option').forEach((item) => item.classList.remove('selected')); button.classList.add('selected'); submitAnswer(letter, answers); });
+            answers.appendChild(button);
+          });
+          wrapper.appendChild(answers);
+        } else {
+          const label = document.createElement('label'); label.className = 'fill-label'; label.textContent = 'Nhập đáp án để tấn công'; label.htmlFor = 'fillAnswer';
+          const input = document.createElement('input'); input.id = 'fillAnswer'; input.className = 'text-input'; input.placeholder = 'Gõ câu trả lời...'; input.autocomplete = 'off';
+          const actions = document.createElement('div'); actions.className = 'question-actions'; const submit = document.createElement('button'); submit.className = 'button'; submit.type = 'button'; submit.textContent = '⚔ Lao tới'; submit.addEventListener('click', () => submitAnswer(input.value, wrapper));
+          input.addEventListener('keydown', (event) => { if (event.key === 'Enter') submit.click(); });
+          actions.appendChild(submit); wrapper.append(label, input, actions);
+        }
+        const feedback = document.createElement('div'); feedback.id = 'feedback'; feedback.className = 'feedback'; feedback.textContent = 'Trả lời đúng để nhân vật lao tới và gây 20 damage.'; wrapper.appendChild(feedback);
+        els.questionContent.replaceChildren(wrapper);
+      }
+
+      function normalizeAnswer(value) { return String(value).trim().toLowerCase().replace(/\s+/g, ' '); }
+
+      function animateCharacter(element, animationClass) {
+        element.classList.remove('idle', 'attack', 'hurt', 'hit');
+        void element.offsetWidth;
+        element.classList.add(animationClass);
+        setTimeout(() => { element.classList.remove(animationClass); element.classList.add('idle'); }, 620);
+      }
+
+      function showDamage(value, target, playerDamage = false) {
+        const damage = document.createElement('span');
+        damage.className = `damage-text${playerDamage ? ' player-damage' : ''}`;
+        damage.textContent = value;
+        damage.style.left = target === 'enemy' ? `${67 + Math.random() * 8}%` : `${20 + Math.random() * 8}%`;
+        damage.style.top = `${38 + Math.random() * 8}%`;
+        els.scene.appendChild(damage);
+        setTimeout(() => damage.remove(), 950);
+      }
+
+      function showReward() {
+        const reward = document.createElement('span');
+        reward.className = 'reward-pop'; reward.textContent = '+100 XP ✦'; els.scene.appendChild(reward);
+        setTimeout(() => reward.remove(), 1100);
+      }
+
+      function submitAnswer(answer, answerContainer) {
+        if (state.answered || !state.currentQuestion || !state.gameRunning || state.mode !== 'battle') return;
+        const question = state.currentQuestion;
+        const isCorrect = question.type === 'multiple_choice' ? String(answer).toUpperCase() === question.answer : normalizeAnswer(answer) === normalizeAnswer(question.answer);
+        state.answered = true;
+        if (answerContainer && answerContainer.querySelectorAll) answerContainer.querySelectorAll('button, input').forEach((item) => { item.disabled = true; });
+        const feedback = $('feedback');
+        if (isCorrect) {
+          state.correct += 1; state.score += 100; state.enemyHp = Math.max(0, state.enemyHp - DAMAGE_TO_ENEMY);
+          feedback.className = 'feedback good'; feedback.textContent = `Chính xác! Nhân vật lao tới, gây ${DAMAGE_TO_ENEMY} damage.`;
+          animateCharacter(els.playerCharacter, 'attack'); animateCharacter(els.enemyCharacter, 'hurt'); showDamage(`-${DAMAGE_TO_ENEMY}`, 'enemy');
+          els.combatLog.textContent = `Đòn đánh trúng đích! ${stages[state.stageIndex].enemy} còn ${state.enemyHp} HP.`;
+        } else {
+          state.wrong += 1; state.score = Math.max(0, state.score - 25); state.playerHp = Math.max(0, state.playerHp - DAMAGE_TO_PLAYER);
+          feedback.className = 'feedback bad'; feedback.textContent = `Chưa đúng. Đáp án: ${question.answer}. Quái vật lao tới, bạn mất ${DAMAGE_TO_PLAYER} HP.`;
+          animateCharacter(els.enemyCharacter, 'attack'); animateCharacter(els.playerCharacter, 'hurt'); showDamage(`-${DAMAGE_TO_PLAYER} HP`, 'player', true);
+          els.combatLog.textContent = `Quái vật phản công! Bạn còn ${state.playerHp} HP.`;
+        }
+        updateHud();
+        if (state.playerHp <= 0) { setTimeout(() => finishGame(false), 760); return; }
+        if (state.enemyHp <= 0) {
+          els.enemyCharacter.classList.remove('idle', 'hurt'); els.enemyCharacter.classList.add('defeat'); showReward();
+          els.combatLog.textContent = `${stages[state.stageIndex].enemy} đã bị đánh bại! Nhân vật tiếp tục lên đường.`;
+          setTimeout(() => advanceStage(), 900); return;
+        }
+        const nextButton = document.createElement('button'); nextButton.type = 'button'; nextButton.className = 'button'; nextButton.textContent = 'Câu tiếp theo →'; nextButton.addEventListener('click', getNextQuestion);
+        const actions = document.createElement('div'); actions.className = 'question-actions'; actions.appendChild(nextButton); $('feedback').after(actions);
+      }
+
+      function advanceStage() {
+        if (state.stageIndex >= stages.length - 1) { finishGame(true); return; }
+        state.stageIndex += 1; setupStage();
+      }
+
+      function loadLeaderboard() {
+        try { const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); return Array.isArray(data) ? data : []; }
+        catch (error) { return []; }
+      }
+
+      function saveResult() {
+        const total = state.correct + state.wrong;
+        const result = { name: state.playerName, score: state.score, correct: state.correct, wrong: state.wrong, accuracy: total ? Math.round(state.correct / total * 100) : 0, date: Date.now() };
+        const leaderboard = [...loadLeaderboard(), result].sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || b.correct - a.correct || a.date - b.date).slice(0, 10);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(leaderboard)); } catch (error) { /* localStorage có thể bị chặn trong chế độ riêng tư. */ }
+      }
+
+      function renderLeaderboard() {
+        const leaderboard = loadLeaderboard();
+        if (!leaderboard.length) { els.leaderboardContent.innerHTML = '<div class="empty-leaderboard">Chưa có thành tích nào. Hãy là người đầu tiên!</div>'; return; }
+        const table = document.createElement('table'); table.innerHTML = '<thead><tr><th>Rank</th><th>Tên</th><th>Điểm</th><th>Đúng</th><th>Sai</th><th>Accuracy</th></tr></thead>';
+        const body = document.createElement('tbody');
+        leaderboard.forEach((entry, index) => { const row = document.createElement('tr'); [index + 1, entry.name, `${entry.score} XP`, entry.correct, entry.wrong, `${entry.accuracy}%`].forEach((value) => { const cell = document.createElement('td'); cell.textContent = value; row.appendChild(cell); }); body.appendChild(row); });
+        table.appendChild(body); const wrap = document.createElement('div'); wrap.className = 'table-wrap'; wrap.appendChild(table); els.leaderboardContent.replaceChildren(wrap);
+      }
+
+      function launchConfetti() {
+        els.confetti.replaceChildren();
+        const colors = ['#ffc857', '#63e6be', '#8e73ff', '#ff6b7a', '#61b9ff'];
+        for (let i = 0; i < 42; i += 1) {
+          const piece = document.createElement('span'); piece.className = 'confetti-piece';
+          piece.style.left = `${Math.random() * 100}%`; piece.style.background = colors[i % colors.length];
+          piece.style.setProperty('--drift', `${-120 + Math.random() * 240}px`); piece.style.animationDelay = `${Math.random() * .45}s`;
+          els.confetti.appendChild(piece);
+        }
+        setTimeout(() => els.confetti.replaceChildren(), 3600);
+      }
+
+      function finishGame(won) {
+        clearTimeout(state.travelTimer); state.gameRunning = false; state.mode = 'result';
+        if (won) { state.score += 500; els.resultMessage.textContent = 'Bạn đã hạ gục Byte Dragon và hoàn thành chuyến phiêu lưu Python!'; launchConfetti(); }
+        else { els.resultMessage.textContent = 'Bạn đã cạn HP. Hãy xem lại câu sai và thử lại nhé!'; els.confetti.replaceChildren(); }
+        saveResult();
+        const total = state.correct + state.wrong; const accuracy = total ? Math.round(state.correct / total * 100) : 0;
+        els.finalName.textContent = state.playerName; els.finalScore.innerHTML = `${state.score} <small>XP</small>`; els.finalAccuracy.textContent = `${accuracy}%`; els.finalCorrect.textContent = state.correct; els.finalWrong.textContent = state.wrong;
+        renderLeaderboard(); showScreen(els.resultScreen);
+      }
+
+      function replay(switchPlayer = false) {
+        if (switchPlayer) { els.playerName.value = ''; showScreen(els.startScreen); els.playerName.focus(); return; }
+        startGame();
+      }
+
+      els.startButton.disabled = true;
+      els.startButton.addEventListener('click', startGame);
+      els.playerName.addEventListener('keydown', (event) => { if (event.key === 'Enter') startGame(); });
+      els.playAgainButton.addEventListener('click', () => replay(false));
+      els.newPlayerButton.addEventListener('click', () => replay(true));
+      loadQuestions();
+    })();
+  </script>
+</body>
+</html>

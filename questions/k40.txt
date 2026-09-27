@@ -1,0 +1,803 @@
+---QUESTION---
+id: 1
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+x = 12
+
+if x % 2 == 0 and x % 3 == 0:
+    print("A")
+elif x % 2 == 0:
+    print("B")
+else:
+    print("C")
+
+A: A
+B: B
+C: C
+D: Không in gì
+
+answer: A
+---END---
+
+---QUESTION---
+id: 2
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+x = 5
+
+if x > 2:
+    x += 3
+
+if x > 7:
+    x *= 2
+else:
+    x -= 1
+
+print(x)
+
+A: 7
+B: 8
+C: 10
+D: 16
+
+answer: D
+---END---
+
+---QUESTION---
+id: 3
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+x = 8
+
+if not (x < 5 or x > 10):
+    print(x + 2)
+else:
+    print(x - 2)
+
+A: 6
+B: 8
+C: 10
+D: 12
+
+answer: C
+---END---
+
+---QUESTION---
+id: 4
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+s = 0
+
+for i in range(1, 8):
+    if i % 2 == 0:
+        s += i
+    else:
+        s -= i
+
+print(s)
+
+A: -4
+B: 4
+C: 12
+D: -16
+
+answer: A
+---END---
+
+---QUESTION---
+id: 5
+type: multiple_choice
+
+question:
+Đoạn code sau in "Python" bao nhiêu lần?
+
+for i in range(4):
+    for j in range(i):
+        print("Python")
+
+A: 4 lần
+B: 6 lần
+C: 8 lần
+D: 10 lần
+
+answer: B
+---END---
+
+---QUESTION---
+id: 6
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+s = 0
+
+for i in range(1, 10):
+    if i == 7:
+        break
+    if i % 2 == 0:
+        continue
+    s += i
+
+print(s)
+
+A: 9
+B: 12
+C: 16
+D: 25
+
+answer: A
+---END---
+
+---QUESTION---
+id: 7
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+s = 0
+
+for i in range(1, 4):
+    for j in range(1, i + 1):
+        s += j
+
+print(s)
+
+A: 6
+B: 9
+C: 10
+D: 12
+
+answer: C
+---END---
+
+---QUESTION---
+id: 8
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+x = 3
+
+while x < 30:
+    x *= 2
+
+print(x)
+
+A: 24
+B: 30
+C: 48
+D: 60
+
+answer: C
+---END---
+
+---QUESTION---
+id: 9
+type: multiple_choice
+
+question:
+Vòng lặp sau chạy bao nhiêu lần?
+
+x = 100
+
+while x > 10:
+    x //= 2
+
+A: 3 lần
+B: 4 lần
+C: 5 lần
+D: 10 lần
+
+answer: B
+---END---
+
+---QUESTION---
+id: 10
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+a = [1, 2, 3, 4, 5, 6, 7]
+
+print(a[1:6:2])
+
+A: [1, 3, 5]
+B: [2, 4, 6]
+C: [2, 4, 6, 7]
+D: [1, 3, 5, 7]
+
+answer: B
+---END---
+
+---QUESTION---
+id: 11
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+a = [1, 2, 3]
+
+a.append([4, 5])
+a.append(6)
+
+print(len(a))
+
+A: 4
+B: 5
+C: 6
+D: 7
+
+answer: B
+---END---
+
+---QUESTION---
+id: 12
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+a = [1, 2, 3]
+a.extend([4, 5])
+a.pop()
+
+print(a)
+
+A: [1, 2, 3, 4]
+B: [1, 2, 3, 5]
+C: [1, 2, 3]
+D: [1, 2, 3, 4, 5]
+
+answer: A
+---END---
+
+---QUESTION---
+id: 13
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+a = [5, 2, 8, 2, 9, 2]
+
+a.remove(2)
+a.remove(2)
+
+print(a)
+
+A: [5, 8, 9]
+B: [5, 8, 9, 2]
+C: [5, 2, 8, 9]
+D: Báo lỗi
+
+answer: B
+---END---
+
+---QUESTION---
+id: 14
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+a = [5, 1, 8, 3, 7]
+
+a.sort(reverse=True)
+
+print(a[1] + a[-1])
+
+A: 6
+B: 8
+C: 9
+D: 12
+
+answer: B
+---END---
+
+---QUESTION---
+id: 15
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+a = [2, 4, 6, 8]
+
+for i in range(len(a)):
+    a[i] += i * 2
+
+print(a)
+
+A: [2, 4, 6, 8]
+B: [2, 6, 10, 14]
+C: [4, 6, 8, 10]
+D: [2, 5, 8, 11]
+
+answer: B
+---END---
+
+---QUESTION---
+id: 16
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+a = [4, 1, 7, 3, 9]
+
+x = a.pop(2)
+a.insert(1, x)
+
+print(a)
+
+A: [4, 7, 1, 3, 9]
+B: [7, 4, 1, 3, 9]
+C: [4, 1, 3, 7, 9]
+D: [4, 1, 7, 3, 9]
+
+answer: A
+---END---
+
+---QUESTION---
+id: 17
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+a = {1, 2, 2, 3, 4, 4, 4}
+
+print(len(a))
+
+A: 3
+B: 4
+C: 5
+D: 7
+
+answer: B
+---END---
+
+---QUESTION---
+id: 18
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+a = {1, 2, 3, 4}
+b = {3, 4, 5, 6}
+
+print(len(a & b))
+
+A: 2
+B: 4
+C: 6
+D: 8
+
+answer: A
+---END---
+
+---QUESTION---
+id: 19
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def tinh(x):
+    return x * 2 + 1
+
+print(tinh(5))
+
+A: 10
+B: 11
+C: 12
+D: 15
+
+answer: B
+---END---
+
+---QUESTION---
+id: 20
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def f(x):
+    if x % 2 == 0:
+        return x // 2
+    return x * 3
+
+print(f(8) + f(3))
+
+A: 10
+B: 11
+C: 13
+D: 17
+
+answer: C
+---END---
+
+---QUESTION---
+id: 21
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def f(x):
+    return x + 2
+
+def g(x):
+    return f(x) * 3
+
+print(g(f(2)))
+
+A: 12
+B: 14
+C: 18
+D: 20
+
+answer: C
+---END---
+
+---QUESTION---
+id: 22
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def tinh(a):
+    s = 0
+
+    for x in a:
+        if x % 2 != 0:
+            s += x
+
+    return s
+
+print(tinh([2, 3, 5, 6, 7]))
+
+A: 10
+B: 12
+C: 15
+D: 21
+
+answer: C
+---END---
+
+---QUESTION---
+id: 23
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def tim(a):
+    m = a[0]
+
+    for x in a:
+        if x > m:
+            m = x
+
+    return m
+
+print(tim([7, 2, 10, 4, 8]))
+
+A: 7
+B: 8
+C: 10
+D: 31
+
+answer: C
+---END---
+
+---QUESTION---
+id: 24
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def dem(a, x):
+    count = 0
+
+    for value in a:
+        if value > x:
+            count += 1
+
+    return count
+
+print(dem([2, 8, 5, 10, 3, 7], 5))
+
+A: 2
+B: 3
+C: 4
+D: 5
+
+answer: B
+---END---
+
+---QUESTION---
+id: 25
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def f(n):
+    s = 0
+
+    while n > 0:
+        s += n % 10
+        n //= 10
+
+    return s
+
+print(f(253))
+
+A: 5
+B: 8
+C: 10
+D: 253
+
+answer: C
+---END---
+
+---QUESTION---
+id: 26
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def f(a):
+    s = set(a)
+    return len(a) - len(s)
+
+print(f([1, 2, 2, 3, 3, 3, 4]))
+
+A: 2
+B: 3
+C: 4
+D: 7
+
+answer: B
+---END---
+
+---QUESTION---
+id: 27
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def f(x):
+    return x * 2
+
+def g(x):
+    return f(x) - 3
+
+def h(x):
+    return g(x) + f(x)
+
+print(h(5))
+
+A: 7
+B: 10
+C: 17
+D: 20
+
+answer: C
+---END---
+
+---QUESTION---
+id: 28
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def xu_ly(a):
+    for i in range(len(a)):
+        if a[i] > 5:
+            return a[i]
+
+    return -1
+
+print(xu_ly([2, 4, 7, 9, 10]))
+
+A: 2
+B: 7
+C: 9
+D: 10
+
+answer: B
+---END---
+
+---QUESTION---
+id: 29
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+d = {
+    "An": 8,
+    "Binh": 7,
+    "Nam": 9
+}
+
+d["Binh"] = 10
+
+print(d["Binh"])
+
+A: 7
+B: 8
+C: 9
+D: 10
+
+answer: D
+---END---
+
+---QUESTION---
+id: 30
+type: multiple_choice
+
+question:
+Kết quả của đoạn code sau là gì?
+
+def xu_ly(a):
+    s = 0
+
+    for x in a:
+        if x % 2 == 0:
+            continue
+
+        if x > 7:
+            break
+
+        s += x
+
+    return s
+
+a = [3, 2, 5, 6, 7, 9, 1]
+
+print(xu_ly(a))
+
+A: 8
+B: 15
+C: 16
+D: 25
+
+answer: B
+---END---
+
+---QUESTION---
+id: 31
+type: fill_blank
+
+question:
+Chương trình sau in ra số nào?
+
+s = 0
+
+for i in range(1, 8):
+    if i % 2 == 0:
+        s += i * 2
+    else:
+        s -= i
+
+print(s)
+
+answer: 8
+---END---
+
+---QUESTION---
+id: 32
+type: fill_blank
+
+question:
+Chương trình sau in ra số nào?
+
+a = [2, 5, 7, 4, 8, 3]
+s = 0
+
+for i in range(len(a)):
+    if i % 2 == 0:
+        s += a[i]
+
+print(s)
+
+answer: 17
+---END---
+
+---QUESTION---
+id: 33
+type: fill_blank
+
+question:
+Chương trình sau in ra số nào?
+
+def tinh(a):
+    s = 0
+
+    for x in a:
+        if x % 2 == 0:
+            s += x
+        elif x > 5:
+            s -= x
+
+    return s
+
+print(tinh([2, 7, 4, 9, 6]))
+
+answer: -4
+---END---
+
+---QUESTION---
+id: 34
+type: fill_blank
+
+question:
+Chương trình sau in ra số nào?
+
+def xu_ly(n):
+    s = 0
+
+    while n > 0:
+        x = n % 10
+
+        if x % 2 == 0:
+            s += x
+
+        n //= 10
+
+    return s
+
+print(xu_ly(572864))
+
+answer: 20
+---END---
+
+---QUESTION---
+id: 35
+type: fill_blank
+
+question:
+Chương trình sau in ra số nào?
+
+def f(a):
+    s = 0
+
+    for i in range(len(a)):
+        if a[i] > 5:
+            s += i
+        else:
+            s += a[i]
+
+    return s
+
+print(f([3, 8, 4, 9, 2]))
+
+answer: 13
+---END---
