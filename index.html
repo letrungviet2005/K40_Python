@@ -3,405 +3,302 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PyQuest - Hành trình Python</title>
-  <meta name="description" content="Game RPG ôn tập Python dành cho học sinh">
+  <title>Python Adventure 3D</title>
+  <meta name="description" content="Mini RPG 3D ôn tập Python">
   <style>
     :root {
-      --ink: #f7f4ff;
-      --muted: #b4b7d0;
-      --panel: rgba(21, 25, 51, .82);
-      --panel-strong: #191d3c;
-      --line: rgba(255, 255, 255, .13);
-      --violet: #8e73ff;
-      --violet-deep: #5d4bd7;
-      --gold: #ffc857;
-      --gold-soft: #ffe19a;
-      --mint: #63e6be;
+      --bg: #070b18;
+      --panel: rgba(15, 23, 43, .9);
+      --panel-2: rgba(21, 32, 57, .93);
+      --line: rgba(153, 188, 235, .2);
+      --ink: #f6f8ff;
+      --muted: #9eacc8;
+      --cyan: #6ce6ff;
+      --gold: #ffd166;
+      --purple: #a78bfa;
+      --mint: #61e5b0;
       --red: #ff6b7a;
-      --blue: #61b9ff;
-      --shadow: 0 24px 70px rgba(4, 6, 20, .42);
+      --shadow: 0 26px 80px rgba(0, 0, 0, .42);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
-      background: #0b0e24;
+      background: var(--bg);
     }
-
     * { box-sizing: border-box; }
-    body {
-      min-width: 320px;
-      min-height: 100vh;
-      margin: 0;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 15% 5%, rgba(96, 83, 222, .28), transparent 28rem),
-        radial-gradient(circle at 85% 10%, rgba(214, 95, 141, .15), transparent 26rem),
-        linear-gradient(150deg, #0b0e24 0%, #141734 56%, #121b35 100%);
-    }
-
+    html, body { min-width: 320px; min-height: 100%; margin: 0; background: var(--bg); }
+    body { min-height: 100vh; overflow-x: hidden; }
     button, input { font: inherit; }
     button { cursor: pointer; }
     button:disabled { cursor: not-allowed; opacity: .55; }
-    .app-shell { width: min(1280px, calc(100% - 36px)); margin: 0 auto; padding: 24px 0 36px; }
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between; gap: 18px;
-      min-height: 62px; margin-bottom: 22px;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand-mark {
-      display: grid; place-items: center; width: 42px; height: 42px;
-      border: 1px solid rgba(255, 200, 87, .5); border-radius: 12px;
-      color: var(--gold); background: linear-gradient(145deg, #302a6a, #171a39);
-      box-shadow: 0 8px 28px rgba(117, 87, 231, .25);
-      font-size: 23px;
-    }
-    .brand strong { display: block; font-size: 15px; letter-spacing: .16em; }
-    .brand span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; letter-spacing: .05em; }
-    .top-actions { display: flex; align-items: center; gap: 10px; }
-    .file-name { max-width: 290px; overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-    .file-name.loading { color: var(--gold-soft); }
-    .file-name.ready { color: var(--mint); }
-    .file-name.error { color: #ffabb3; }
-
-    .button {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      min-height: 42px; padding: 0 16px; border: 1px solid transparent; border-radius: 10px;
-      color: #fff; background: var(--violet-deep); box-shadow: 0 8px 18px rgba(75, 57, 174, .28);
-      font-weight: 750; transition: transform .18s ease, filter .18s ease, background .18s ease;
-    }
-    .button:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
-    .button.secondary { border-color: var(--line); background: rgba(255, 255, 255, .06); box-shadow: none; }
-    .button.gold { color: #27203c; background: var(--gold); box-shadow: 0 8px 18px rgba(255, 200, 87, .25); }
-    .button.large { min-height: 50px; padding: 0 23px; }
-    .button.icon { width: 42px; padding: 0; }
-
+    .app-shell { width: min(1500px, calc(100% - 32px)); margin: 0 auto; padding: 18px 0 28px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 58px; margin-bottom: 16px; }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid rgba(108, 230, 255, .35); border-radius: 12px; color: var(--cyan); background: #111c35; box-shadow: 0 9px 26px rgba(39, 165, 205, .2); font-size: 23px; }
+    .brand strong { display: block; color: #fff; font-size: 15px; letter-spacing: .18em; }
+    .brand span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; letter-spacing: .12em; }
+    .question-status { color: var(--muted); font-size: 12px; text-align: right; }
+    .question-status.ready { color: var(--mint); }
+    .question-status.error { color: #ffabb3; }
     .screen { display: none; }
     .screen.active { display: block; }
-    .hero {
-      position: relative; overflow: hidden; display: grid; place-items: center;
-      min-height: calc(100vh - 175px); padding: 54px 28px; border: 1px solid var(--line); border-radius: 22px;
-      background: linear-gradient(145deg, rgba(27, 31, 70, .9), rgba(21, 25, 52, .76)); box-shadow: var(--shadow);
-      text-align: center;
-    }
-    .hero::before, .hero::after { content: ""; position: absolute; border: 1px solid rgba(255, 200, 87, .18); border-radius: 50%; pointer-events: none; }
-    .hero::before { width: 550px; height: 550px; transform: translate(48%, -40%); }
-    .hero::after { width: 420px; height: 420px; transform: translate(-62%, 40%); border-color: rgba(99, 230, 190, .16); }
-    .hero-content { position: relative; z-index: 1; width: min(660px, 100%); }
-    .eyebrow { margin: 0 0 14px; color: var(--gold); font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
-    h1 { margin: 0; font-size: clamp(38px, 7vw, 72px); line-height: .98; letter-spacing: -.045em; }
-    .hero h1 span { color: var(--gold); }
-    .hero-copy { max-width: 560px; margin: 22px auto 30px; color: var(--muted); line-height: 1.7; }
-    .start-card { width: min(460px, 100%); margin: 0 auto; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: rgba(9, 12, 30, .46); text-align: left; }
-    .field-label { display: block; margin-bottom: 8px; color: var(--gold-soft); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-    .text-input {
-      width: 100%; height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: 9px;
-      outline: none; color: var(--ink); background: rgba(255, 255, 255, .07); transition: border .18s ease, box-shadow .18s ease;
-    }
-    .text-input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(142, 115, 255, .18); }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 43px; padding: 0 17px; border: 1px solid transparent; border-radius: 10px; color: #fff; background: #5d4bd7; box-shadow: 0 9px 24px rgba(67, 58, 169, .3); font-weight: 800; transition: transform .18s ease, filter .18s ease, background .18s ease; }
+    .button:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.09); }
+    .button.gold { color: #231b30; background: var(--gold); box-shadow: 0 10px 25px rgba(255, 209, 102, .22); }
+    .button.secondary { border-color: var(--line); background: rgba(255, 255, 255, .05); box-shadow: none; }
+    .button.large { min-height: 51px; padding: 0 24px; }
+    .hero { position: relative; display: grid; place-items: center; min-height: calc(100vh - 120px); overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: radial-gradient(circle at 50% 18%, rgba(109, 80, 220, .28), transparent 27rem), linear-gradient(145deg, #111a38, #0c1328); box-shadow: var(--shadow); text-align: center; }
+    .hero::before { content: ""; position: absolute; inset: 10% 12%; border: 1px solid rgba(108, 230, 255, .1); border-radius: 50%; transform: rotate(-16deg); pointer-events: none; }
+    .hero-content { position: relative; z-index: 1; width: min(680px, calc(100% - 34px)); }
+    .eyebrow { margin: 0 0 13px; color: var(--gold); font-size: 11px; font-weight: 850; letter-spacing: .2em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(40px, 7vw, 74px); line-height: .97; letter-spacing: -.055em; }
+    h1 span { color: var(--cyan); }
+    .hero-copy { max-width: 580px; margin: 22px auto 28px; color: var(--muted); line-height: 1.7; }
+    .start-card { width: min(440px, 100%); margin: 0 auto; padding: 21px; border: 1px solid var(--line); border-radius: 14px; background: rgba(5, 11, 26, .65); text-align: left; backdrop-filter: blur(9px); }
+    .field-label { display: block; margin-bottom: 8px; color: var(--gold); font-size: 11px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+    .text-input { width: 100%; height: 47px; padding: 0 13px; border: 1px solid var(--line); border-radius: 9px; outline: none; color: var(--ink); background: rgba(255, 255, 255, .06); }
+    .text-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(108, 230, 255, .13); }
     .start-card .button { width: 100%; margin-top: 14px; }
-    .small-note { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
-    .small-note strong { color: var(--gold-soft); }
-    .load-note { min-height: 18px; margin: 12px 0 0; color: var(--muted); font-size: 12px; }
+    .load-note { min-height: 17px; margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
     .load-note.ready { color: var(--mint); }
     .load-note.error { color: #ffabb3; }
 
-    .hud { display: grid; grid-template-columns: 1.05fr 1.2fr .7fr; gap: 12px; margin-bottom: 15px; }
-    .hud-card { min-height: 78px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); box-shadow: 0 12px 28px rgba(4, 6, 20, .16); }
-    .hud-label { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-    .hud-value { margin-top: 7px; font-size: 18px; font-weight: 800; }
+    .game-layout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(330px, 3fr); gap: 15px; align-items: stretch; }
+    .world-panel, .question-panel, .result-panel, .leaderboard-panel { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); box-shadow: var(--shadow); }
+    .world-panel { position: relative; min-height: 680px; overflow: hidden; background: #0d1830; }
+    #game-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .world-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 45%, rgba(3, 6, 18, .56) 100%); }
+    .world-hud { position: absolute; z-index: 3; top: 15px; right: 15px; left: 15px; display: grid; grid-template-columns: 1.3fr 1fr 1fr 1.05fr; gap: 9px; pointer-events: none; }
+    .hud-card { min-width: 0; padding: 11px 12px; border: 1px solid rgba(176, 208, 246, .2); border-radius: 10px; background: rgba(9, 15, 31, .72); backdrop-filter: blur(8px); }
+    .hud-label { display: flex; justify-content: space-between; gap: 5px; color: var(--muted); font-size: 9px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+    .hud-value { margin-top: 5px; font-size: 15px; font-weight: 850; }
     .hud-value.gold { color: var(--gold); }
-    .progress { height: 9px; margin-top: 10px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, .1); }
-    .progress-bar { width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--mint), #baffea); transition: width .35s ease; }
-    .progress-bar.enemy { background: linear-gradient(90deg, var(--red), #ffb083); }
-    .progress-bar.boss { background: linear-gradient(90deg, #c457ff, #ff8cb7); }
-
-    .game-layout { display: block; }
-    .arena, .question-panel, .leaderboard-panel { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); box-shadow: var(--shadow); }
-    .arena { min-height: 570px; padding: 22px; background: linear-gradient(175deg, rgba(32, 38, 77, .9), rgba(19, 24, 48, .86)); }
-    .arena-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
-    .area-kicker { margin: 0 0 6px; color: var(--gold); font-size: 12px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
-    .area-title { margin: 0; font-size: clamp(22px, 3vw, 31px); letter-spacing: -.025em; }
-    .stage-count { color: var(--muted); font-size: 12px; white-space: nowrap; }
-    .scene { position: relative; display: grid; place-items: center; min-height: 490px; margin: 18px 0 0; overflow: hidden; border: 1px solid rgba(255, 255, 255, .1); border-radius: 14px; background: radial-gradient(circle at 50% 40%, rgba(142, 115, 255, .23), transparent 22%), linear-gradient(160deg, #16264a 0%, #271d48 56%, #371d3a 100%); transition: background .7s ease, box-shadow .7s ease; }
-    .scene.stage-forest { background: radial-gradient(circle at 48% 30%, rgba(99, 230, 190, .24), transparent 23%), linear-gradient(160deg, #123d49 0%, #174c48 48%, #172b3e 100%); }
-    .scene.stage-cave { background: radial-gradient(circle at 51% 31%, rgba(142, 115, 255, .3), transparent 22%), linear-gradient(160deg, #1b204d 0%, #32214f 48%, #17182f 100%); }
-    .scene.stage-valley { background: radial-gradient(circle at 53% 28%, rgba(255, 200, 87, .22), transparent 24%), linear-gradient(160deg, #24455a 0%, #375268 44%, #392b49 100%); }
-    .scene.stage-castle { background: radial-gradient(circle at 52% 30%, rgba(255, 107, 122, .25), transparent 21%), linear-gradient(160deg, #301f48 0%, #3a204d 48%, #17172e 100%); }
-    .scene-transition { animation: sceneReveal .7s ease both; }
-    .scene::before { content: ""; position: absolute; inset: auto 0 0; height: 44%; background: linear-gradient(0deg, rgba(3, 7, 20, .62), transparent); }
-    .stars { position: absolute; inset: 0; opacity: .58; background-image: radial-gradient(circle, rgba(255, 255, 255, .8) 0 1px, transparent 1px); background-size: 58px 47px; }
-    .road { position: absolute; right: 7%; bottom: 0; left: 7%; height: 35%; opacity: .62; background: linear-gradient(169deg, transparent 0 43%, rgba(232, 198, 135, .3) 44% 72%, rgba(103, 67, 65, .34) 73%); clip-path: polygon(29% 0, 70% 0, 100% 100%, 0 100%); }
-    .scene-stage-name { position: absolute; z-index: 2; top: 23px; left: 27px; color: rgba(255, 255, 255, .7); font-size: 11px; font-weight: 850; letter-spacing: .2em; text-transform: uppercase; }
-    .travel-banner { position: absolute; z-index: 3; top: 20px; right: 22px; display: flex; align-items: center; gap: 10px; max-width: 330px; padding: 10px 13px; border: 1px solid rgba(255, 255, 255, .18); border-radius: 11px; background: rgba(7, 10, 28, .48); backdrop-filter: blur(8px); }
-    .travel-banner-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; color: var(--gold); background: rgba(255, 200, 87, .13); font-size: 16px; }
-    .travel-banner p { margin: 0; color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
-    .travel-banner strong { display: block; margin-top: 3px; font-size: 12px; }
-    .travel-banner.battle { border-color: rgba(255, 200, 87, .35); }
-    .travel-banner.hidden { opacity: 0; transform: translateY(-8px); pointer-events: none; }
-    .battle-side { position: absolute; z-index: 1; bottom: 38px; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 42%; }
-    .battle-side.player-side { left: 3%; }
-    .battle-side.enemy-side { right: 3%; }
-    .battle-side.enemy-side { transition: opacity .35s ease, transform .35s ease; }
-    .scene.traveling .enemy-side { opacity: 0; transform: translateX(90px) scale(.9); pointer-events: none; }
-    .scene.traveling .player-side { animation: journeyMove 1.8s ease-in-out infinite alternate; }
-    .scene.battle-ready .player-side { animation: playerArrive .55s ease both; }
-    .character { display: grid; place-items: center; width: 140px; height: 140px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .17); font-size: 66px; filter: drop-shadow(0 18px 22px rgba(0, 0, 0, .32)); transition: transform .2s ease, opacity .3s ease; }
-    .character.player { background: radial-gradient(circle at 32% 27%, #77f1cd, #287f9c 58%, #16445c); }
-    .character.enemy { background: radial-gradient(circle at 35% 23%, #ffb57d, #a14671 55%, #4a2052); }
-    .character.boss { width: 174px; height: 174px; font-size: 85px; background: radial-gradient(circle at 35% 23%, #ffa4e0, #773d9d 55%, #2b2056); }
-    .character.idle { animation: idleFloat 2.8s ease-in-out infinite; }
-    .character.walk { animation: walkBob .42s ease-in-out infinite alternate; }
-    .character.hurt { animation: hurt .48s ease; }
-    .character.attack { animation: attack .48s ease; }
-    .character.defeat { animation: defeat .72s ease forwards; }
-    .character.hit { animation: hurt .42s ease; }
-    @keyframes hit { 30% { transform: translateX(-13px) rotate(-4deg); filter: drop-shadow(0 0 18px var(--red)); } 65% { transform: translateX(9px); } }
-    @keyframes attack { 40% { transform: translateX(24px) scale(1.05); } 70% { transform: translateX(-4px); } }
-    @keyframes idleFloat { 50% { transform: translateY(-5px); } }
-    @keyframes walkBob { 50% { transform: translateY(-8px) rotate(-3deg); } }
-    @keyframes hurt { 20%, 60% { transform: translateX(-11px); filter: drop-shadow(0 0 20px var(--red)); } 40%, 80% { transform: translateX(10px); } }
-    @keyframes defeat { 45% { transform: translateY(-17px) rotate(8deg); } 100% { opacity: 0; transform: translateY(28px) rotate(20deg) scale(.55); } }
-    @keyframes journeyMove { from { transform: translateX(-5%); } to { transform: translateX(105%); } }
-    @keyframes playerArrive { from { transform: translateX(105%) scale(.9); } to { transform: translateX(0) scale(1); } }
-    @keyframes sceneReveal { from { opacity: .3; transform: scale(1.015); } to { opacity: 1; transform: scale(1); } }
-    .battle-name { color: var(--ink); font-size: 13px; font-weight: 800; }
-    .battle-hp { width: min(180px, 100%); }
-    .battle-hp .progress { height: 8px; margin-top: 0; }
-    .vs { position: absolute; z-index: 1; top: 45%; color: rgba(255, 255, 255, .25); font-size: 22px; font-weight: 900; letter-spacing: .22em; }
-    .combat-log { position: absolute; z-index: 2; right: 14px; bottom: 13px; left: 14px; min-height: 32px; color: var(--gold-soft); font-size: 12px; text-align: center; }
-    .damage-text { position: absolute; z-index: 5; color: var(--gold); font-size: 26px; font-weight: 950; text-shadow: 0 3px 0 rgba(59, 26, 66, .8); pointer-events: none; animation: damageRise .9s ease-out forwards; }
-    .damage-text.player-damage { color: #ffabb3; }
-    @keyframes damageRise { from { opacity: 0; transform: translateY(12px) scale(.8); } 18% { opacity: 1; } to { opacity: 0; transform: translateY(-76px) scale(1.14); } }
-    .reward-pop { position: absolute; z-index: 5; top: 50%; left: 50%; color: var(--gold); font-size: 21px; font-weight: 900; pointer-events: none; animation: rewardPop 1s ease-out forwards; }
-    @keyframes rewardPop { from { opacity: 0; transform: translate(-50%, 15px) scale(.7); } 18% { opacity: 1; } to { opacity: 0; transform: translate(-50%, -65px) scale(1.08); } }
-    .question-panel { margin-top: 15px; padding: 22px; background: linear-gradient(145deg, rgba(29, 34, 73, .94), rgba(17, 21, 44, .9)); }
-    .question-panel.traveling { border-color: rgba(99, 230, 190, .2); }
-    .question-panel.traveling .question-content-wrap { opacity: .75; }
-    .question-content-wrap { transition: opacity .3s ease; }
-    .question-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
-    .question-header h2 { margin: 0; font-size: 18px; }
-    .question-number { color: var(--muted); font-size: 12px; }
-    .question-text { margin: 0 0 18px; white-space: pre-wrap; color: #fff; font-size: 17px; font-weight: 650; line-height: 1.55; }
-    .answers { display: grid; gap: 10px; }
-    .answer-option { display: flex; gap: 11px; align-items: flex-start; width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: rgba(255, 255, 255, .045); text-align: left; transition: border .18s ease, background .18s ease, transform .18s ease; }
-    .answer-option:hover:not(:disabled) { border-color: var(--violet); background: rgba(142, 115, 255, .12); transform: translateX(2px); }
-    .answer-option.selected { border-color: var(--gold); background: rgba(255, 200, 87, .14); }
-    .answer-option.correct { border-color: var(--mint); background: rgba(99, 230, 190, .14); }
+    .progress { height: 7px; margin-top: 8px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, .12); }
+    .progress-bar { width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--mint), #baffea); transition: width .38s ease; }
+    .progress-bar.enemy { background: linear-gradient(90deg, var(--red), #ffb17a); }
+    .progress-bar.boss { background: linear-gradient(90deg, #ff5d87, #c77dff); }
+    .zone-banner { position: absolute; z-index: 3; top: 88px; left: 50%; padding: 9px 16px; border: 1px solid rgba(255, 209, 102, .28); border-radius: 999px; color: var(--gold); background: rgba(8, 14, 29, .62); font-size: 11px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; transform: translateX(-50%); opacity: 0; transition: opacity .28s ease, transform .28s ease; pointer-events: none; }
+    .zone-banner.show { opacity: 1; transform: translateX(-50%) translateY(4px); }
+    .world-toast { position: absolute; z-index: 3; bottom: 22px; left: 50%; min-height: 23px; padding: 7px 13px; border: 1px solid rgba(108, 230, 255, .22); border-radius: 999px; color: #d8eeff; background: rgba(7, 13, 29, .65); font-size: 12px; text-align: center; transform: translateX(-50%); opacity: 0; transition: opacity .25s ease; pointer-events: none; white-space: nowrap; }
+    .world-toast.show { opacity: 1; }
+    .world-enemy-hud { position: absolute; z-index: 4; width: 132px; padding: 6px 8px; border: 1px solid rgba(255, 255, 255, .19); border-radius: 8px; background: rgba(6, 11, 25, .75); box-shadow: 0 7px 15px rgba(0, 0, 0, .25); transform: translate(-50%, -100%); transition: opacity .18s ease; pointer-events: none; }
+    .world-enemy-hud.hidden { opacity: 0; }
+    .world-enemy-name { display: flex; justify-content: space-between; gap: 4px; color: #fff; font-size: 9px; font-weight: 850; }
+    .world-enemy-hud .progress { height: 5px; margin-top: 5px; }
+    .world-enemy-hud small { color: var(--muted); font-size: 9px; }
+    .controls-hint { position: absolute; z-index: 3; right: 17px; bottom: 17px; padding: 7px 10px; border: 1px solid rgba(255, 255, 255, .13); border-radius: 7px; color: var(--muted); background: rgba(8, 13, 27, .55); font-size: 10px; pointer-events: none; }
+    .world-floating { position: absolute; z-index: 6; color: var(--gold); font-size: 22px; font-weight: 950; text-shadow: 0 3px 0 rgba(20, 13, 42, .8); pointer-events: none; transform: translate(-50%, -50%); animation: floatText 1s ease-out forwards; }
+    .world-floating.player-damage { color: #ffabb3; }
+    @keyframes floatText { from { opacity: 0; transform: translate(-50%, 9px) scale(.82); } 16% { opacity: 1; } to { opacity: 0; transform: translate(-50%, -55px) scale(1.08); } }
+    .question-panel { min-height: 680px; padding: 18px; background: linear-gradient(155deg, rgba(24, 35, 62, .96), rgba(11, 19, 37, .96)); }
+    .challenge-kicker { margin: 0 0 7px; color: var(--cyan); font-size: 10px; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+    .challenge-title { margin: 0; font-size: 23px; letter-spacing: -.03em; }
+    .challenge-subtitle { margin: 6px 0 17px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .enemy-card { margin-bottom: 16px; padding: 12px; border: 1px solid rgba(255, 255, 255, .12); border-radius: 10px; background: rgba(255, 255, 255, .045); }
+    .enemy-card-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .enemy-card-name { font-weight: 850; }
+    .enemy-card-name small { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; font-weight: 600; }
+    .enemy-hp-text { color: var(--gold); font-size: 12px; font-weight: 850; }
+    .question-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 15px 0 12px; }
+    .question-header h2 { margin: 0; font-size: 15px; }
+    .question-number { color: var(--muted); font-size: 11px; }
+    .question-content-wrap { animation: questionIn .28s ease both; }
+    @keyframes questionIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    .question-copy { margin: 0 0 14px; padding: 13px; overflow: auto; border: 1px solid rgba(108, 230, 255, .15); border-radius: 9px; color: #dff8ff; background: #090f20; font: 600 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace; white-space: pre-wrap; }
+    .answers { display: grid; gap: 8px; }
+    .answer-option { display: flex; gap: 10px; align-items: flex-start; width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, .12); border-radius: 8px; color: var(--ink); background: rgba(255, 255, 255, .045); text-align: left; transition: transform .15s ease, border .15s ease, background .15s ease; }
+    .answer-option:hover:not(:disabled) { border-color: var(--cyan); background: rgba(108, 230, 255, .1); transform: translateX(2px); }
+    .answer-option.correct { border-color: var(--mint); background: rgba(97, 229, 176, .14); }
     .answer-option.wrong { border-color: var(--red); background: rgba(255, 107, 122, .14); }
-    .choice-letter { display: grid; place-items: center; flex: 0 0 25px; width: 25px; height: 25px; border-radius: 7px; color: var(--gold); background: rgba(255, 200, 87, .14); font-size: 12px; font-weight: 850; }
+    .choice-letter { display: grid; place-items: center; flex: 0 0 24px; width: 24px; height: 24px; border-radius: 6px; color: var(--gold); background: rgba(255, 209, 102, .13); font-size: 11px; font-weight: 900; }
     .answer-option span:last-child { line-height: 1.4; }
-    .fill-label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 12px; }
-    .feedback { min-height: 42px; margin: 16px 0 0; padding: 10px 12px; border-radius: 9px; background: rgba(255, 255, 255, .05); color: var(--muted); font-size: 13px; line-height: 1.45; }
-    .feedback.good { color: var(--mint); background: rgba(99, 230, 190, .1); }
-    .feedback.bad { color: #ffabb3; background: rgba(255, 107, 122, .1); }
-    .question-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 14px; }
-    .empty-question { padding: 34px 10px; color: var(--muted); text-align: center; line-height: 1.6; }
-    .empty-question strong { display: block; margin-bottom: 6px; color: var(--gold-soft); }
+    .fill-label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 11px; }
+    .feedback { min-height: 42px; margin-top: 13px; padding: 10px; border-radius: 8px; color: var(--muted); background: rgba(255, 255, 255, .045); font-size: 12px; line-height: 1.45; }
+    .feedback.good { color: var(--mint); background: rgba(97, 229, 176, .11); }
+    .feedback.bad { color: #ffabb3; background: rgba(255, 107, 122, .11); }
+    .question-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+    .question-actions .button { min-height: 39px; font-size: 12px; }
+    .travel-card { padding: 25px 12px; border: 1px dashed rgba(108, 230, 255, .25); border-radius: 10px; color: var(--muted); text-align: center; line-height: 1.6; }
+    .travel-card strong { display: block; margin-bottom: 7px; color: var(--gold); font-size: 16px; }
+    .panel-error { padding: 16px 12px; border-radius: 9px; color: #ffabb3; background: rgba(255, 107, 122, .1); font-size: 12px; line-height: 1.5; }
 
-    .results-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 15px; align-items: start; }
-    .result-card, .leaderboard-panel { padding: 25px; }
-    .result-card { border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(150deg, rgba(46, 43, 97, .92), rgba(20, 25, 52, .9)); box-shadow: var(--shadow); }
-    .result-badge { display: grid; place-items: center; width: 72px; height: 72px; margin-bottom: 18px; border: 1px solid rgba(255, 200, 87, .35); border-radius: 22px; color: var(--gold); background: rgba(255, 200, 87, .12); font-size: 36px; }
-    .result-card h2 { margin: 0 0 8px; font-size: 30px; }
-    .result-card p { margin: 0; color: var(--muted); line-height: 1.55; }
-    .score-big { margin: 26px 0; color: var(--gold); font-size: 52px; font-weight: 900; letter-spacing: -.05em; }
-    .score-big small { color: var(--muted); font-size: 13px; font-weight: 700; letter-spacing: .04em; }
-    .stat-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 20px; }
-    .stat-item { padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255, 255, 255, .04); }
-    .stat-item span { display: block; color: var(--muted); font-size: 11px; }
-    .stat-item strong { display: block; margin-top: 4px; font-size: 19px; }
+    .result-layout { display: grid; grid-template-columns: minmax(290px, .8fr) minmax(0, 1.2fr); gap: 15px; align-items: start; }
+    .result-panel, .leaderboard-panel { padding: 24px; }
+    .result-panel { background: radial-gradient(circle at 70% 10%, rgba(108, 230, 255, .13), transparent 20rem), linear-gradient(145deg, rgba(27, 43, 77, .98), rgba(12, 19, 38, .98)); }
+    .result-badge { display: grid; place-items: center; width: 67px; height: 67px; margin-bottom: 17px; border: 1px solid rgba(255, 209, 102, .35); border-radius: 20px; color: var(--gold); background: rgba(255, 209, 102, .11); font-size: 33px; }
+    .result-panel h2 { margin: 0 0 8px; font-size: 29px; }
+    .result-panel p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .score-big { margin: 23px 0; color: var(--gold); font-size: 48px; font-weight: 950; letter-spacing: -.05em; }
+    .score-big small { color: var(--muted); font-size: 12px; letter-spacing: .06em; }
+    .stat-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-item { padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, .04); }
+    .stat-item span { display: block; color: var(--muted); font-size: 10px; }
+    .stat-item strong { display: block; margin-top: 4px; font-size: 18px; }
+    .result-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 17px; }
+    .result-actions .button { flex: 1 1 150px; }
     .leaderboard-panel h2 { margin: 0; font-size: 21px; }
-    .leaderboard-caption { margin: 7px 0 17px; color: var(--muted); font-size: 12px; }
+    .leaderboard-caption { margin: 6px 0 16px; color: var(--muted); font-size: 12px; }
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 520px; }
-    th, td { padding: 11px 9px; border-bottom: 1px solid var(--line); font-size: 12px; text-align: left; }
-    th { color: var(--muted); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
-    td:first-child { color: var(--gold); font-weight: 850; }
-    td:nth-child(3) { color: var(--gold-soft); font-weight: 800; }
+    table { width: 100%; min-width: 520px; border-collapse: collapse; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid var(--line); font-size: 12px; text-align: left; }
+    th { color: var(--muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    td:first-child { color: var(--gold); font-weight: 900; }
+    td:nth-child(3) { color: var(--gold); font-weight: 850; }
     .empty-leaderboard { padding: 24px 4px; color: var(--muted); text-align: center; }
-    .result-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
-    .result-actions .button { flex: 1 1 160px; }
     .confetti { position: fixed; z-index: 30; inset: 0; overflow: hidden; pointer-events: none; }
-    .confetti-piece { position: absolute; top: -18px; width: 9px; height: 16px; border-radius: 2px; animation: confettiFall 2.7s cubic-bezier(.2, .7, .4, 1) forwards; }
-    @keyframes confettiFall { to { opacity: 0; transform: translate3d(var(--drift), 108vh, 0) rotate(720deg); } }
-
-    .toast { position: fixed; z-index: 20; right: 20px; bottom: 20px; max-width: min(380px, calc(100% - 40px)); padding: 13px 15px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: #252b55; box-shadow: var(--shadow); transform: translateY(20px); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; font-size: 13px; line-height: 1.4; }
+    .confetti-piece { position: absolute; top: -20px; width: 8px; height: 15px; border-radius: 2px; animation: confettiFall 2.8s ease-out forwards; }
+    @keyframes confettiFall { to { opacity: 0; transform: translate3d(var(--drift), 110vh, 0) rotate(720deg); } }
+    .toast { position: fixed; z-index: 40; right: 20px; bottom: 20px; max-width: min(400px, calc(100% - 40px)); padding: 12px 14px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: #182746; box-shadow: var(--shadow); font-size: 12px; line-height: 1.45; transform: translateY(18px); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
     .toast.show { opacity: 1; transform: translateY(0); }
-    .toast.error { border-color: rgba(255, 107, 122, .5); }
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .toast.error { border-color: rgba(255, 107, 122, .45); }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 
-    @media (max-width: 860px) {
-      .game-layout, .results-grid { grid-template-columns: 1fr; }
-      .arena { min-height: auto; }
-      .scene { min-height: 410px; }
-      .results-grid .leaderboard-panel { order: 2; }
+    @media (max-width: 980px) {
+      .game-layout { grid-template-columns: 1fr; }
+      .world-panel, .question-panel { min-height: 590px; }
+      .question-panel { min-height: auto; }
     }
     @media (max-width: 620px) {
-      .app-shell { width: min(100% - 22px, 1280px); padding-top: 14px; }
+      .app-shell { width: calc(100% - 18px); padding-top: 10px; }
       .topbar { align-items: flex-start; }
       .brand span { display: none; }
-      .top-actions { flex-wrap: wrap; justify-content: flex-end; }
-      .file-name { display: none; }
-      .hero { min-height: calc(100vh - 125px); padding: 34px 16px; }
-      .hero-copy { font-size: 14px; }
-      .hud { grid-template-columns: 1fr 1fr; }
-      .hud-card:first-child { grid-column: 1 / -1; }
-      .arena, .question-panel, .result-card, .leaderboard-panel { padding: 16px; }
-      .scene { min-height: 350px; }
-      .character { width: 105px; height: 105px; font-size: 52px; }
-      .character.boss { width: 132px; height: 132px; font-size: 66px; }
-      .battle-side { bottom: 38px; width: 46%; }
-      .battle-side.player-side { left: 0; }
-      .battle-side.enemy-side { right: 0; }
-      .area-title { font-size: 24px; }
-      .score-big { font-size: 44px; }
+      .question-status { max-width: 180px; font-size: 10px; }
+      .hero { min-height: calc(100vh - 93px); }
+      .world-panel { min-height: 550px; }
+      .world-hud { grid-template-columns: 1fr 1fr; }
+      .world-hud .hud-card:first-child { grid-column: 1 / -1; }
+      .hud-card { padding: 9px; }
+      .hud-label { font-size: 8px; }
+      .world-enemy-hud { width: 112px; }
+      .controls-hint { left: 15px; right: auto; }
+      .result-layout { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div class="brand" aria-label="PyQuest">
-        <div class="brand-mark" aria-hidden="true">⌘</div>
-        <div><strong>PYQUEST</strong><span>HÀNH TRÌNH ÔN TẬP PYTHON</span></div>
+      <div class="brand" aria-label="Python Adventure">
+        <div class="brand-mark" aria-hidden="true">✦</div>
+        <div><strong>PYTHON ADVENTURE</strong><span>LOW-POLY CODING RPG</span></div>
       </div>
-      <div class="top-actions">
-        <span id="fileName" class="file-name loading">Đang tải questions/k40.txt…</span>
-      </div>
+      <div id="questionStatus" class="question-status">Đang tải questions/k40.txt…</div>
     </header>
 
     <main>
       <section id="startScreen" class="screen active" aria-labelledby="startTitle">
         <div class="hero">
           <div class="hero-content">
-            <p class="eyebrow">Adventure mode · Python fundamentals</p>
-            <h1 id="startTitle">Đánh thức <span>mã nguồn</span>.</h1>
-            <p class="hero-copy">Vượt qua bốn vùng đất, trả lời câu hỏi Python và hạ gục quái vật bằng kiến thức của bạn. Mỗi câu trả lời đúng là một đòn tấn công.</p>
+            <p class="eyebrow">Top-down expedition · Python fundamentals</p>
+            <h1 id="startTitle">Code your way <span>forward.</span></h1>
+            <p class="hero-copy">Tự mình băng qua rừng, hang động, thung lũng và lâu đài. Khi chạm trán quái vật, kiến thức Python sẽ trở thành thanh kiếm của bạn.</p>
             <div class="start-card">
               <label class="field-label" for="playerName">Tên người chơi</label>
               <input id="playerName" class="text-input" type="text" maxlength="24" placeholder="Nhập tên của bạn" autocomplete="name">
-              <button id="startButton" class="button gold large" type="button">Bắt đầu cuộc phiêu lưu&nbsp; →</button>
-              <p class="small-note"><strong>Bộ câu hỏi:</strong> game tự động đọc `questions/k40.txt` khi mở trang.</p>
-              <p id="loadNote" class="load-note" role="status">Đang kết nối tới kho câu hỏi…</p>
+              <button id="startButton" class="button gold large" type="button" disabled>⚔ Bắt đầu phiêu lưu</button>
+              <p id="loadNote" class="load-note">Đang kết nối tới kho câu hỏi…</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="gameScreen" class="screen" aria-label="Khu vực chiến đấu">
-        <div class="hud">
-          <div class="hud-card">
-            <div class="hud-label"><span id="playerHudName">Người chơi</span><span id="playerHpText">100 / 100 HP</span></div>
-            <div class="progress" aria-label="Máu người chơi"><div id="playerHpBar" class="progress-bar"></div></div>
-          </div>
-          <div class="hud-card">
-            <div class="hud-label"><span>Tiến độ hành trình</span><span id="progressText">Khu 1 / 4</span></div>
-            <div class="progress"><div id="stageProgressBar" class="progress-bar" style="width: 25%"></div></div>
-          </div>
-          <div class="hud-card">
-            <div class="hud-label"><span>Điểm</span><span id="questionStats">0 đúng · 0 sai</span></div>
-            <div id="scoreText" class="hud-value gold">0 XP</div>
-          </div>
-        </div>
-
+      <section id="gameScreen" class="screen" aria-label="Thế giới phiêu lưu">
         <div class="game-layout">
-          <article class="arena">
-            <div class="arena-header">
-              <div><p id="areaKicker" class="area-kicker">Khu vực 01</p><h2 id="areaTitle" class="area-title">Thung lũng Code</h2></div>
-              <div id="stageCount" class="stage-count">Kẻ địch 1 / 4</div>
+          <div id="worldPanel" class="world-panel">
+            <canvas id="gameCanvas" tabindex="0" aria-label="Bản đồ 3D Python Adventure"></canvas>
+            <div class="world-vignette" aria-hidden="true"></div>
+            <div class="world-hud">
+              <div class="hud-card"><div class="hud-label"><span id="hudPlayerName">PLAYER</span><span id="playerHpText">100 / 100 HP</span></div><div class="progress"><div id="playerHpBar" class="progress-bar"></div></div></div>
+              <div class="hud-card"><div class="hud-label"><span>Khu vực</span><span id="zoneText">Rừng</span></div><div id="stageText" class="hud-value">1 / 4</div></div>
+              <div class="hud-card"><div class="hud-label"><span>Chiến tích</span><span id="statsText">0 đúng · 0 sai</span></div><div id="scoreText" class="hud-value gold">0 XP</div></div>
+              <div class="hud-card"><div class="hud-label"><span>Tiến độ</span><span id="progressText">Forest</span></div><div class="progress"><div id="progressBar" class="progress-bar"></div></div></div>
             </div>
-            <div id="scene" class="scene stage-forest traveling scene-transition">
-              <div class="stars" aria-hidden="true"></div>
-              <div class="road" aria-hidden="true"></div>
-              <div class="scene-stage-name" id="sceneStageName">Rừng khởi hành</div>
-              <div id="travelBanner" class="travel-banner">
-                <div id="travelBannerIcon" class="travel-banner-icon" aria-hidden="true">➜</div>
-                <div><p id="travelLabel">Đang phiêu lưu</p><strong id="travelMessage">Nhân vật đang tiến vào khu vực mới…</strong></div>
-              </div>
-              <div class="battle-side player-side">
-                <div id="playerCharacter" class="character player idle" aria-label="Nhân vật người chơi">🧙</div>
-                <div id="battlePlayerName" class="battle-name">Người chơi</div>
-                <div class="battle-hp"><div class="progress"><div id="scenePlayerHpBar" class="progress-bar"></div></div></div>
-              </div>
-              <div class="vs" aria-hidden="true">VS</div>
-              <div class="battle-side enemy-side">
-                <div id="enemyCharacter" class="character enemy idle" aria-label="Quái vật">👾</div>
-                <div id="enemyName" class="battle-name">Bug Goblin</div>
-                <div class="battle-hp"><div class="progress"><div id="enemyHpBar" class="progress-bar enemy"></div></div></div>
-              </div>
-              <div id="combatLog" class="combat-log" aria-live="polite">Đánh bại quái vật bằng câu trả lời đúng.</div>
-            </div>
-          </article>
+            <div id="zoneBanner" class="zone-banner">RỪNG SƯƠNG MÃ</div>
+            <div id="worldEnemyHud" class="world-enemy-hud hidden"><div class="world-enemy-name"><span id="worldEnemyName">SLIME</span><small id="worldEnemyHp">60 / 60</small></div><div class="progress"><div id="worldEnemyBar" class="progress-bar enemy"></div></div></div>
+            <div id="worldToast" class="world-toast" aria-live="polite"></div>
+            <div class="controls-hint">WASD / mũi tên để di chuyển · Chạm quái để chiến đấu</div>
+          </div>
 
-          <article id="questionPanel" class="question-panel" aria-live="polite">
-            <div class="question-header"><h2>Thử thách Python</h2><span id="questionNumber" class="question-number">Câu 1</span></div>
-            <div id="questionContent"></div>
-          </article>
+          <aside id="questionPanel" class="question-panel" aria-live="polite">
+            <p class="challenge-kicker">Python challenge</p>
+            <h2 class="challenge-title">Bảng chiến thuật</h2>
+            <p class="challenge-subtitle">Hãy di chuyển trên bản đồ. Khi đứng gần quái, câu hỏi sẽ mở ra tại đây.</p>
+            <div class="enemy-card">
+              <div class="enemy-card-top"><div class="enemy-card-name"><span id="enemyName">Chưa chạm trán</span><small id="enemyState">Đang khám phá</small></div><span id="enemyHpText" class="enemy-hp-text">-- / -- HP</span></div>
+              <div class="progress"><div id="enemyHpBar" class="progress-bar enemy"></div></div>
+            </div>
+            <div class="question-header"><h2>Question</h2><span id="questionNumber" class="question-number">Chưa bắt đầu</span></div>
+            <div id="questionContent"><div id="questionText" class="travel-card"><strong>🌲 Bản đồ đang chờ</strong>Dùng WASD hoặc phím mũi tên để tìm quái vật đầu tiên.</div><div id="answerArea"></div></div>
+          </aside>
         </div>
       </section>
 
       <section id="resultScreen" class="screen" aria-labelledby="resultTitle">
         <div id="confetti" class="confetti" aria-hidden="true"></div>
-        <div class="results-grid">
-          <article class="result-card">
+        <div class="result-layout">
+          <article class="result-panel">
             <div class="result-badge" aria-hidden="true">✦</div>
             <p class="eyebrow">Adventure complete</p>
-            <h2 id="resultTitle">Hành trình đã hoàn tất!</h2>
-            <p id="resultMessage">Bạn đã chứng minh khả năng đọc hiểu Python.</p>
+            <h2 id="resultTitle">Victory!</h2>
+            <p id="resultMessage">Bạn đã hoàn thành chuyến phiêu lưu Python.</p>
             <div id="finalScore" class="score-big">0 <small>XP</small></div>
             <div class="stat-list">
               <div class="stat-item"><span>Người chơi</span><strong id="finalName">-</strong></div>
-              <div class="stat-item"><span>Độ chính xác</span><strong id="finalAccuracy">0%</strong></div>
+              <div class="stat-item"><span>Accuracy</span><strong id="finalAccuracy">0%</strong></div>
               <div class="stat-item"><span>Câu đúng</span><strong id="finalCorrect">0</strong></div>
               <div class="stat-item"><span>Câu sai</span><strong id="finalWrong">0</strong></div>
             </div>
             <div class="result-actions"><button id="playAgainButton" class="button gold" type="button">↻ Chơi lại</button><button id="newPlayerButton" class="button secondary" type="button">Đổi người chơi</button></div>
           </article>
-          <article class="leaderboard-panel">
-            <h2>Bảng xếp hạng</h2>
-            <p class="leaderboard-caption">Top 10 thành tích được lưu trên thiết bị này.</p>
-            <div id="leaderboardContent"></div>
-          </article>
+          <article class="leaderboard-panel"><h2>Bảng xếp hạng</h2><p class="leaderboard-caption">Top 10 thành tích lưu trên thiết bị này.</p><div id="leaderboardContent"></div></article>
         </div>
       </section>
     </main>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
   <script>
     (() => {
       'use strict';
 
-      const STORAGE_KEY = 'pyquest_leaderboard_v1';
       const QUESTION_PATH = 'questions/k40.txt';
+      const STORAGE_KEY = 'pyquest_leaderboard_v1';
       const MAX_PLAYER_HP = 100;
       const DAMAGE_TO_ENEMY = 20;
       const DAMAGE_TO_PLAYER = 15;
+      const ZONE_WIDTH = 16;
+      const ZONE_CENTERS = [-24, -8, 8, 24];
+      const GATE_X = [-16, 0, 16];
       const stages = [
-        { kicker: 'Khu vực 01', name: 'Rừng Sương Mã', scene: 'forest', travelIcon: '🌲', enemy: 'Bug Goblin', icon: '👾', hp: 40 },
-        { kicker: 'Khu vực 02', name: 'Hang động Vòng lặp', scene: 'cave', travelIcon: '🕯️', enemy: 'Loop Wraith', icon: '🦇', hp: 60 },
-        { kicker: 'Khu vực 03', name: 'Thung lũng Hàm', scene: 'valley', travelIcon: '🏞️', enemy: 'Function Golem', icon: '🗿', hp: 80 },
-        { kicker: 'Khu vực 04 · BOSS', name: 'Lâu đài Byte', scene: 'castle', travelIcon: '🏰', enemy: 'Byte Dragon', icon: '🐉', hp: 150, boss: true }
+        { name: 'Rừng Sương Mã', shortName: 'Rừng', scene: 'forest', enemy: 'Slime', icon: 'slime', hp: 40, color: 0x66e0ab },
+        { name: 'Hang động Vòng lặp', shortName: 'Hang động', scene: 'cave', enemy: 'Cave Goblin', icon: 'goblin', hp: 60, color: 0xa98bff },
+        { name: 'Thung lũng Hàm', shortName: 'Thung lũng', scene: 'valley', enemy: 'Function Skeleton', icon: 'skeleton', hp: 80, color: 0xffc45f },
+        { name: 'Lâu đài Byte', shortName: 'Lâu đài Boss', scene: 'castle', enemy: 'Byte Dragon', icon: 'boss', hp: 150, color: 0xff627d, boss: true }
       ];
 
       const state = {
-        questions: [], currentQuestion: null, questionOrder: [], questionIndex: 0,
+        questions: [], questionBank: [], questionOrder: [], questionIndex: 0, currentQuestion: null,
         playerName: '', playerHp: MAX_PLAYER_HP, score: 0, correct: 0, wrong: 0,
-        stageIndex: 0, enemyHp: 0, answered: false, gameRunning: false,
-        mode: 'loading', questionError: '', travelTimer: null
+        zoneIndex: 0, defeated: [false, false, false, false], mode: 'loading', battleActive: false, movementLocked: false, canMove: true, playerCanMove: true, isInBattle: false, isAttacking: false, isHurt: false, lastDefeatedEnemy: null, answered: false,
+        action: null, gameRunning: false, questionsReady: false, questionsLoaded: false, threeReady: false, questionError: ''
       };
 
       const $ = (id) => document.getElementById(id);
       const els = {
-        startScreen: $('startScreen'), gameScreen: $('gameScreen'), resultScreen: $('resultScreen'),
-        fileName: $('fileName'), loadNote: $('loadNote'), playerName: $('playerName'), startButton: $('startButton'),
-        playerHudName: $('playerHudName'), playerHpText: $('playerHpText'), playerHpBar: $('playerHpBar'), scenePlayerHpBar: $('scenePlayerHpBar'),
-        progressText: $('progressText'), stageProgressBar: $('stageProgressBar'), scoreText: $('scoreText'), questionStats: $('questionStats'),
-        areaKicker: $('areaKicker'), areaTitle: $('areaTitle'), stageCount: $('stageCount'), scene: $('scene'), sceneStageName: $('sceneStageName'),
-        travelBanner: $('travelBanner'), travelBannerIcon: $('travelBannerIcon'), travelLabel: $('travelLabel'), travelMessage: $('travelMessage'),
-        playerCharacter: $('playerCharacter'), battlePlayerName: $('battlePlayerName'), enemyCharacter: $('enemyCharacter'), enemyName: $('enemyName'),
-        enemyHpBar: $('enemyHpBar'), combatLog: $('combatLog'), questionNumber: $('questionNumber'), questionPanel: $('questionPanel'), questionContent: $('questionContent'),
-        finalName: $('finalName'), finalScore: $('finalScore'), finalAccuracy: $('finalAccuracy'), finalCorrect: $('finalCorrect'), finalWrong: $('finalWrong'), resultMessage: $('resultMessage'),
-        leaderboardContent: $('leaderboardContent'), playAgainButton: $('playAgainButton'), newPlayerButton: $('newPlayerButton'), confetti: $('confetti'), toast: $('toast')
+        startScreen: $('startScreen'), gameScreen: $('gameScreen'), resultScreen: $('resultScreen'), playerName: $('playerName'), startButton: $('startButton'),
+        questionStatus: $('questionStatus'), loadNote: $('loadNote'), worldPanel: $('worldPanel'), canvas: $('gameCanvas'),
+        hudPlayerName: $('hudPlayerName'), playerHpText: $('playerHpText'), playerHpBar: $('playerHpBar'), zoneText: $('zoneText'), stageText: $('stageText'), statsText: $('statsText'), scoreText: $('scoreText'), progressText: $('progressText'), progressBar: $('progressBar'),
+        zoneBanner: $('zoneBanner'), worldEnemyHud: $('worldEnemyHud'), worldEnemyName: $('worldEnemyName'), worldEnemyHp: $('worldEnemyHp'), worldEnemyBar: $('worldEnemyBar'), worldToast: $('worldToast'),
+        enemyName: $('enemyName'), enemyState: $('enemyState'), enemyHpText: $('enemyHpText'), enemyHpBar: $('enemyHpBar'), questionPanel: $('questionPanel'), questionNumber: $('questionNumber'), questionContent: $('questionContent'),
+        finalName: $('finalName'), finalScore: $('finalScore'), finalAccuracy: $('finalAccuracy'), finalCorrect: $('finalCorrect'), finalWrong: $('finalWrong'), resultMessage: $('resultMessage'), leaderboardContent: $('leaderboardContent'), playAgainButton: $('playAgainButton'), newPlayerButton: $('newPlayerButton'), confetti: $('confetti'), toast: $('toast')
       };
+
+      let scene, camera, renderer, clock;
+      let player, currentEnemy, enemies = [], activeEnemies = [], encounterTargets = [], enemyColliders = [], obstacles = [], gates = [], effects = [];
+      const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+      const MOVEMENT_DEBUG = false;
+      let lastCollisionLog = '';
+      let cameraLookAt = null;
+      let toastTimer, worldToastTimer, zoneBannerTimer;
 
       function showScreen(screen) {
         [els.startScreen, els.gameScreen, els.resultScreen].forEach((item) => item.classList.remove('active'));
@@ -409,346 +306,403 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      let toastTimer;
-      function showToast(message, isError = false) {
-        clearTimeout(toastTimer);
-        els.toast.textContent = message;
-        els.toast.className = `toast show${isError ? ' error' : ''}`;
+      function showToast(message, error = false) {
+        clearTimeout(toastTimer); els.toast.textContent = message; els.toast.className = `toast show${error ? ' error' : ''}`;
         toastTimer = setTimeout(() => { els.toast.className = 'toast'; }, 3800);
       }
 
-      function setLoadStatus(message, status = '') {
-        els.fileName.textContent = message;
-        els.fileName.className = `file-name ${status}`;
-        els.loadNote.textContent = message;
-        els.loadNote.className = `load-note ${status}`;
+      function worldToast(message) {
+        clearTimeout(worldToastTimer); els.worldToast.textContent = message; els.worldToast.classList.add('show');
+        worldToastTimer = setTimeout(() => els.worldToast.classList.remove('show'), 2700);
+      }
+
+      function showZoneBanner(message) {
+        clearTimeout(zoneBannerTimer); els.zoneBanner.textContent = message; els.zoneBanner.classList.add('show');
+        zoneBannerTimer = setTimeout(() => els.zoneBanner.classList.remove('show'), 2200);
+      }
+
+      function updateStartReady() {
+        const ready = state.questionsLoaded && state.threeReady;
+        els.startButton.disabled = !ready;
+        if (ready) { els.loadNote.textContent = `Đã sẵn sàng · ${state.questionBank.length} câu hỏi`; els.loadNote.className = 'load-note ready'; }
       }
 
       function createQuestionId() {
-        return (window.crypto && typeof window.crypto.randomUUID === 'function')
-          ? window.crypto.randomUUID()
-          : `q-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        return window.crypto && typeof window.crypto.randomUUID === 'function' ? window.crypto.randomUUID() : `q-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       }
 
       function cleanQuestion(item) {
         if (!item || !item.type || !item.question || item.answer === undefined) return null;
         const type = String(item.type).trim().toLowerCase();
         if (!['multiple_choice', 'fill_blank'].includes(type)) return null;
-        const question = String(item.question).trim();
-        const answer = String(item.answer).trim();
+        const question = String(item.question).trim(); const answer = String(item.answer).trim();
         if (!question || !answer) return null;
         if (type === 'multiple_choice') {
           const choices = ['A', 'B', 'C', 'D'].map((letter) => String(item[letter] ?? '').trim());
           if (choices.some((choice) => !choice)) return null;
-          const normalizedAnswer = answer.toUpperCase();
-          if (!['A', 'B', 'C', 'D'].includes(normalizedAnswer)) return null;
-          return { id: String(item.id || createQuestionId()), type, question, choices, answer: normalizedAnswer };
+          const normalizedAnswer = answer.toUpperCase(); if (!['A', 'B', 'C', 'D'].includes(normalizedAnswer)) return null;
+          return { id: String(item.id || createQuestionId()), type, question, choices, options: { A: choices[0], B: choices[1], C: choices[2], D: choices[3] }, answer: normalizedAnswer };
         }
-        return { id: String(item.id || createQuestionId()), type, question, choices: [], answer };
+        return { id: String(item.id || createQuestionId()), type, question, choices: [], options: {}, answer };
       }
 
       function parseTxt(text) {
         const blocks = text.split(/---QUESTION---/i).slice(1);
         return blocks.map((raw) => {
-          const block = raw.split(/---END---/i)[0];
-          const lines = block.replace(/^\s+|\s+$/g, '').split(/\r?\n/);
-          const item = { question: '', A: '', B: '', C: '', D: '' };
-          let questionMode = false;
-          const questionLines = [];
+          const block = raw.split(/---END---/i)[0]; const lines = block.replace(/^\s+|\s+$/g, '').split(/\r?\n/);
+          const item = { question: '', A: '', B: '', C: '', D: '' }; let questionMode = false; const questionLines = [];
           lines.forEach((line) => {
             const match = line.match(/^\s*(id|type|answer|A|B|C|D)\s*:\s*(.*)\s*$/i);
-            if (match) {
-              const key = match[1].toLowerCase();
-              const value = match[2];
-              questionMode = false;
-              if (key === 'id' || key === 'type' || key === 'answer') item[key] = value;
-              else item[key.toUpperCase()] = value;
-            } else if (/^\s*question\s*:/i.test(line)) {
-              const inlineQuestion = line.replace(/^\s*question\s*:\s*/i, '');
-              questionMode = !inlineQuestion;
-              if (inlineQuestion) questionLines.push(inlineQuestion);
-            } else if (questionMode) {
-              questionLines.push(line);
-            }
+            if (match) { const key = match[1].toLowerCase(); questionMode = false; if (key === 'id' || key === 'type' || key === 'answer') item[key] = match[2]; else item[key.toUpperCase()] = match[2]; }
+            else if (/^\s*question\s*:/i.test(line)) { const inline = line.replace(/^\s*question\s*:\s*/i, ''); questionMode = !inline; if (inline) questionLines.push(inline); }
+            else if (questionMode) questionLines.push(line);
           });
-          item.question = questionLines.join('\n').trim();
-          return cleanQuestion(item);
+          item.question = questionLines.join('\n').trim(); return cleanQuestion(item);
         }).filter(Boolean);
       }
 
       async function loadQuestions() {
-        setLoadStatus(`Đang tải ${QUESTION_PATH}…`, 'loading');
         try {
           const response = await fetch(QUESTION_PATH, { cache: 'no-store' });
           if (!response.ok) throw new Error(`Không tìm thấy ${QUESTION_PATH} (HTTP ${response.status}).`);
-          const text = await response.text();
-          const questions = parseTxt(text);
-          if (!questions.length) throw new Error(`${QUESTION_PATH} không có câu hỏi hợp lệ.`);
-          state.questions = questions;
-          state.questionError = '';
-          els.startButton.disabled = false;
-          setLoadStatus(`Đã tải ${QUESTION_PATH} · ${questions.length} câu`, 'ready');
+          const questions = parseTxt(await response.text()); if (!questions.length) throw new Error(`${QUESTION_PATH} không có câu hỏi hợp lệ.`);
+          state.questions = questions; state.questionBank = questions; state.questionsReady = true; state.questionsLoaded = true; state.questionError = '';
+          els.questionStatus.textContent = `${QUESTION_PATH} · ${questions.length} câu`; els.questionStatus.className = 'question-status ready';
+          console.log('Questions loaded:', state.questionBank.length);
+          updateStartReady();
         } catch (error) {
-          state.questions = [];
-          state.questionError = error.message;
-          els.startButton.disabled = false;
-          setLoadStatus(`${error.message} Hãy kiểm tra file và chạy bằng HTTP.`, 'error');
-          showToast(`Không thể tải câu hỏi: ${error.message}`, true);
+          state.questions = []; state.questionBank = []; state.questionsReady = false; state.questionsLoaded = false; state.questionError = error.message; console.error('Questions failed to load:', error); els.questionStatus.textContent = `Lỗi tải câu hỏi: ${error.message}`; els.questionStatus.className = 'question-status error'; els.loadNote.textContent = `${error.message} Hãy chạy bằng HTTP.`; els.loadNote.className = 'load-note error'; els.startButton.disabled = true; showToast(error.message, true);
         }
+      }
+
+      function mat(color, roughness = .75, metalness = .05) { return new THREE.MeshStandardMaterial({ color, roughness, metalness }); }
+      function mesh(geometry, material, x = 0, y = 0, z = 0) { const item = new THREE.Mesh(geometry, material); item.position.set(x, y, z); item.castShadow = true; item.receiveShadow = true; return item; }
+      function addObstacle(x, z, radius) { obstacles.push({ x, z, radius }); }
+
+      function buildWorld() {
+        const zoneColors = [0x123e3e, 0x22274f, 0x36546a, 0x352444];
+        zoneColors.forEach((color, index) => {
+          const ground = mesh(new THREE.BoxGeometry(ZONE_WIDTH, .35, 30), mat(color), ZONE_CENTERS[index], -.2, 0); ground.receiveShadow = true; scene.add(ground);
+          const path = mesh(new THREE.BoxGeometry(ZONE_WIDTH, .06, 4.4), mat(index === 3 ? 0x55445f : 0x83705b, .95), ZONE_CENTERS[index], .02, 0); scene.add(path);
+        });
+        const water = mesh(new THREE.BoxGeometry(4.5, .06, 7), mat(0x1d8ea4, .35, .1), -16, .04, 9); scene.add(water);
+        const bridge = mesh(new THREE.BoxGeometry(4.8, .3, 7), mat(0x9a744c, .8), -16, .24, 9); scene.add(bridge);
+        for (let i = 0; i < 16; i += 1) { const side = i % 2 ? 1 : -1; const x = -30 + (i % 8) * 2.1; const z = side * (7 + (i % 3) * 2); addTree(x, z, .78 + (i % 3) * .08); }
+        for (let i = 0; i < 10; i += 1) { const x = -12 + (i % 5) * 2.3; const z = i % 2 ? -8 : 8; addRock(x, z, .6 + (i % 3) * .15); }
+        for (let i = 0; i < 8; i += 1) { addCrystal(2 + (i % 4) * 2.1, (i % 2 ? 1 : -1) * (7 + (i % 3)), i % 2 ? 0x8e73ff : 0x6ce6ff); }
+        for (let i = 0; i < 10; i += 1) { addFlower(2 + (i % 5) * 2.2, (i % 2 ? 1 : -1) * (7 + (i % 3) * 1.5)); }
+        [-24, -8, 8, 24].forEach((x) => { addLantern(x - 4.2, -3.5); addLantern(x + 4.2, 3.5); });
+        buildCastle();
+        GATE_X.forEach((x, index) => buildGate(x, index));
+      }
+
+      function addTree(x, z, scale) {
+        const group = new THREE.Group(); group.position.set(x, 0, z); group.scale.setScalar(scale);
+        group.add(mesh(new THREE.CylinderGeometry(.23, .32, 1.8, 7), mat(0x76513b), 0, .9, 0));
+        group.add(mesh(new THREE.ConeGeometry(1.25, 2.7, 7), mat(0x2c956d), 0, 2.85, 0));
+        group.add(mesh(new THREE.ConeGeometry(.95, 2.1, 7), mat(0x42b986), 0, 4.05, 0)); scene.add(group); addObstacle(x, z, .7 * scale);
+      }
+      function addRock(x, z, scale) { const rock = mesh(new THREE.DodecahedronGeometry(scale, 0), mat(0x5b6880), x, scale * .48, z); rock.rotation.y = x; scene.add(rock); addObstacle(x, z, scale * .85); }
+      function addCrystal(x, z, color) { const crystal = mesh(new THREE.ConeGeometry(.34, 1.45, 5), mat(color, .45, .2), x, .73, z); crystal.rotation.z = .18; scene.add(crystal); }
+      function addFlower(x, z) { const stem = mesh(new THREE.CylinderGeometry(.04, .04, .55, 5), mat(0x55c987), x, .27, z); const head = mesh(new THREE.SphereGeometry(.2, 7, 5), mat(0xf6c4ff), x, .62, z); scene.add(stem, head); }
+      function addLantern(x, z) { const pole = mesh(new THREE.CylinderGeometry(.07, .1, 1.35, 6), mat(0x59627c), x, .68, z); const lamp = mesh(new THREE.SphereGeometry(.2, 8, 6), mat(0xffd166, .3, .1), x, 1.5, z); const light = new THREE.PointLight(0xffc76b, 1.35, 6, 2); light.position.set(x, 1.5, z); scene.add(pole, lamp, light); }
+
+      function buildCastle() {
+        const stone = mat(0x554f78); const wall = mesh(new THREE.BoxGeometry(13, 2.5, .65), stone, 25, 1.25, -8); scene.add(wall);
+        const wall2 = mesh(new THREE.BoxGeometry(13, 2.5, .65), stone, 25, 1.25, 8); scene.add(wall2);
+        [-30, -24, 24, 30].forEach((x) => { const tower = mesh(new THREE.CylinderGeometry(1.2, 1.45, 5, 8), stone, x, 2.5, x % 2 ? -8 : 8); scene.add(tower); scene.add(mesh(new THREE.ConeGeometry(1.65, 2.1, 8), mat(0x9f516e), x, 6.1, x % 2 ? -8 : 8)); });
+        const castle = mesh(new THREE.BoxGeometry(5.6, 5.2, 3.8), mat(0x493f70), 25, 2.6, 0); scene.add(castle);
+      }
+
+      function buildGate(x, index) {
+        const group = new THREE.Group(); group.position.set(x, 0, 0); const stone = mat(0x6a6685); const gold = mat(0xd19b4a, .5, .25);
+        const left = mesh(new THREE.BoxGeometry(.7, 4.7, .7), stone, 0, 2.35, -3.15); const right = mesh(new THREE.BoxGeometry(.7, 4.7, .7), stone, 0, 2.35, 3.15); const beam = mesh(new THREE.BoxGeometry(.85, .65, 7), gold, 0, 4.55, 0);
+        group.add(left, right, beam); scene.add(group); gates.push({ index, x, group, left, right, open: false, colliderEnabled: true, progress: 0 });
+      }
+
+      function createPlayer() {
+        const group = new THREE.Group(); group.position.set(-29, 0, 0); group.userData = { baseY: 0, moving: false, sword: null, parts: [] };
+        const bodyMat = mat(0x4e7bf2, .58, .12); const skin = mat(0xffc29b); const metal = mat(0xdce7ff, .35, .7);
+        const body = mesh(new THREE.BoxGeometry(.85, 1.05, .72), bodyMat, 0, 1.22, 0); const head = mesh(new THREE.SphereGeometry(.42, 8, 6), skin, 0, 2.12, 0); group.add(body, head);
+        const cape = mesh(new THREE.BoxGeometry(1.02, 1.18, .16), mat(0x643cb5), 0, 1.28, -.43); group.add(cape);
+        const armL = mesh(new THREE.BoxGeometry(.22, .75, .22), skin, -.62, 1.27, 0); const armR = mesh(new THREE.BoxGeometry(.22, .75, .22), skin, .62, 1.27, 0); group.add(armL, armR);
+        const legL = mesh(new THREE.BoxGeometry(.27, .7, .27), bodyMat, -.25, .43, 0); const legR = mesh(new THREE.BoxGeometry(.27, .7, .27), bodyMat, .25, .43, 0); group.add(legL, legR);
+        const sword = new THREE.Group(); const blade = mesh(new THREE.BoxGeometry(.12, 1.35, .18), metal, .83, 1.05, 0); const hilt = mesh(new THREE.BoxGeometry(.55, .1, .12), goldMaterial(), .83, .42, 0); sword.add(blade, hilt); sword.rotation.z = -.62; group.add(sword);
+        group.userData.parts = [body, head, cape, armL, armR, legL, legR, blade, hilt]; group.userData.baseColors = group.userData.parts.map((part) => part.material.color.getHex()); group.userData.legs = [legL, legR]; group.userData.arms = [armL, armR]; group.userData.sword = sword; scene.add(group); return group;
+      }
+      function goldMaterial() { return mat(0xffd166, .45, .4); }
+
+      function createEnemy(stage, index) {
+        const group = new THREE.Group(); group.position.set(ZONE_CENTERS[index], 0, 0); group.userData = { index, stage, home: group.position.clone(), alive: true, death: null, flashUntil: 0, rage: false, parts: [] };
+        group.name = stage.enemy; group.mesh = group; group.hp = stage.hp; group.maxHp = stage.hp; group.defeated = false; group.active = true; group.colliderEnabled = true; group.enemyStage = stage; group.homePosition = group.position.clone(); group.collider = { enemy: group, radius: 1.6 };
+        const parts = [];
+        if (stage.icon === 'slime') { parts.push(mesh(new THREE.SphereGeometry(1.05, 12, 7), mat(0x54dcaa, .48), 0, 1.05, 0)); parts.push(mesh(new THREE.SphereGeometry(.12, 8, 6), mat(0x10233d), -.32, 1.25, -.87), mesh(new THREE.SphereGeometry(.12, 8, 6), mat(0x10233d), .32, 1.25, -.87)); }
+        if (stage.icon === 'goblin') { parts.push(mesh(new THREE.DodecahedronGeometry(.85), mat(0xa77cff), 0, 1.1, 0)); parts.push(mesh(new THREE.ConeGeometry(.38, .7, 5), mat(0x762f9b), -.45, 1.9, 0), mesh(new THREE.ConeGeometry(.38, .7, 5), mat(0x762f9b), .45, 1.9, 0)); }
+        if (stage.icon === 'skeleton') { parts.push(mesh(new THREE.CylinderGeometry(.67, .8, 1.55, 7), mat(0xffc45f), 0, 1.35, 0)); parts.push(mesh(new THREE.SphereGeometry(.55, 8, 6), mat(0xffe2a0), 0, 2.45, 0)); }
+        if (stage.icon === 'boss') { parts.push(mesh(new THREE.DodecahedronGeometry(1.5), mat(0xd34f85, .4, .2), 0, 1.8, 0)); parts.push(mesh(new THREE.ConeGeometry(.62, 1.7, 6), mat(0xff7a99), -.8, 3.5, 0), mesh(new THREE.ConeGeometry(.62, 1.7, 6), mat(0xff7a99), .8, 3.5, 0)); }
+        parts.forEach((part) => group.add(part)); group.userData.parts = parts; group.userData.baseColors = parts.map((part) => part.material.color.getHex()); if (stage.boss) group.scale.setScalar(1.6); scene.add(group); return group;
+      }
+
+      function initThree() {
+        if (!window.THREE) { showToast('Không tải được Three.js. Kiểm tra kết nối mạng.', true); return; }
+        scene = new THREE.Scene(); scene.background = new THREE.Color(0x091328); scene.fog = new THREE.Fog(0x091328, 28, 72);
+        camera = new THREE.PerspectiveCamera(47, 1, .1, 140); camera.position.set(-29, 14, 15); cameraLookAt = new THREE.Vector3(-29, 0, 0);
+        renderer = new THREE.WebGLRenderer({ canvas: els.canvas, antialias: true }); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        scene.add(new THREE.HemisphereLight(0x9fd9ff, 0x10142c, 1.6)); const sun = new THREE.DirectionalLight(0xffe8bb, 2.2); sun.position.set(-12, 24, 12); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024); scene.add(sun);
+        buildWorld(); player = createPlayer(); enemies = stages.map((stage, index) => createEnemy(stage, index)); activeEnemies = [...enemies]; encounterTargets = [...enemies]; enemyColliders = enemies.map((enemy) => enemy.collider); currentEnemy = enemies[0]; clock = new THREE.Clock(); state.threeReady = true; resize(); updateStartReady(); els.canvas.addEventListener('pointerdown', () => els.canvas.focus()); window.addEventListener('resize', resize); requestAnimationFrame(loop);
+      }
+
+      function resize() { if (!renderer) return; const width = Math.max(1, els.worldPanel.clientWidth); const height = Math.max(1, els.worldPanel.clientHeight); renderer.setSize(width, height, false); camera.aspect = width / height; camera.updateProjectionMatrix(); }
+      function textInputFocused() { const tag = document.activeElement?.tagName; return tag === 'INPUT' || tag === 'TEXTAREA'; }
+      function clearKeys() { Object.keys(keys).forEach((key) => { keys[key] = false; }); }
+      function onKeyDown(event) {
+        if (textInputFocused()) { clearKeys(); return; }
+        if (Object.prototype.hasOwnProperty.call(keys, event.key)) {
+          keys[event.key] = true;
+          if (event.key.startsWith('Arrow')) event.preventDefault();
+          if (MOVEMENT_DEBUG) console.log('keys:', keys);
+        }
+      }
+      function onKeyUp(event) {
+        if (Object.prototype.hasOwnProperty.call(keys, event.key)) keys[event.key] = false;
+      }
+
+      function currentStage() { return stages[state.zoneIndex]; }
+      function currentGate() { return gates[state.zoneIndex]; }
+      function getCollision(position) {
+        const halfW = 31.3, halfD = 13.6; const previousGateLimit = state.zoneIndex === 0 ? -halfW : GATE_X[state.zoneIndex - 1] + 1.25;
+        if (position.x < previousGateLimit || position.x > halfW || position.z < -halfD || position.z > halfD) return { type: 'world-boundary', position: position.clone() };
+        for (const obstacle of obstacles) { const dx = position.x - obstacle.x; const dz = position.z - obstacle.z; if (dx * dx + dz * dz < (obstacle.radius + .52) ** 2) return { type: obstacle.owner?.name || 'obstacle', obstacle }; }
+        for (const gate of gates) { if (gate.colliderEnabled && !gate.open && Math.abs(position.x - gate.x) < .9 && Math.abs(position.z) < 3.9) return { type: 'gate', gate }; }
+        for (const collider of enemyColliders) { const enemy = collider.enemy; if (enemy.defeated || !enemy.active || !enemy.colliderEnabled) continue; const dx = position.x - enemy.position.x; const dz = position.z - enemy.position.z; if (dx * dx + dz * dz < (collider.radius + .02) ** 2) return { type: 'enemy', enemy }; }
+        return null;
+      }
+      function checkCollision(position) { return Boolean(getCollision(position)); }
+
+      function updateMovement(dt) {
+        if (!player || !state.gameRunning || state.mode !== 'exploring' || state.battleActive || state.movementLocked || !state.canMove || !state.playerCanMove || state.action) return;
+        if (textInputFocused()) { clearKeys(); player.userData.moving = false; return; }
+        const direction = new THREE.Vector3();
+        if (keys.w || keys.ArrowUp) direction.z -= 1;
+        if (keys.s || keys.ArrowDown) direction.z += 1;
+        if (keys.a || keys.ArrowLeft) direction.x -= 1;
+        if (keys.d || keys.ArrowRight) direction.x += 1;
+        const moving = direction.lengthSq() > 0; player.userData.moving = moving; if (!moving) { updatePlayerPose(0); return; }
+        direction.normalize();
+        const oldPosition = player.position.clone();
+        player.position.x += direction.x * 5.2 * dt;
+        player.position.z += direction.z * 5.2 * dt;
+        const collision = getCollision(player.position);
+        if (collision) { const collisionKey = `${collision.type}:${collision.enemy?.name || collision.gate?.index || ''}`; if (collisionKey !== lastCollisionLog) { console.log('BLOCKED BY:', collision); lastCollisionLog = collisionKey; } player.position.copy(oldPosition); }
+        else lastCollisionLog = '';
+        if (keys.w && MOVEMENT_DEBUG) console.log({ W: keys.w, state: state.mode, locked: state.movementLocked, battle: state.battleActive, canMove: state.playerCanMove, x: player.position.x, z: player.position.z });
+        if (MOVEMENT_DEBUG) console.log('gameState:', state.mode, 'battleActive:', state.battleActive, 'player:', player.position);
+        player.rotation.y = Math.atan2(direction.x, direction.z); updatePlayerPose(performance.now() / 1000);
+        updateZoneProgress(); checkEncounter();
+      }
+
+      function updatePlayerPose(time) {
+        if (!player) return; const swing = player.userData.moving ? Math.sin(time * 13) * .38 : Math.sin(time * 2.4) * .03; player.userData.legs[0].rotation.x = swing; player.userData.legs[1].rotation.x = -swing; player.userData.arms[0].rotation.x = -swing; player.userData.arms[1].rotation.x = swing; player.position.y = player.userData.baseY + (player.userData.moving ? Math.abs(Math.sin(time * 13)) * .08 : Math.sin(time * 2.4) * .04); }
+
+      function updateZoneProgress() {
+        if (state.zoneIndex >= stages.length - 1 || !state.defeated[state.zoneIndex]) return;
+        const gate = currentGate(); if (player.position.x > gate.x + 1.4) { state.zoneIndex += 1; currentEnemy = enemies[state.zoneIndex]; updateHud(); showZoneBanner(`${currentStage().shortName} · ${currentStage().name}`); worldToast(`Đã đến ${currentStage().name}. Tìm ${currentStage().enemy}.`); }
+      }
+
+      function checkEncounter() {
+        if (state.mode !== 'exploring' || state.battleActive) return;
+        for (const enemy of encounterTargets) {
+          if (enemy.defeated || !enemy.active || !enemy.mesh?.visible) continue;
+          if (enemy.userData.index !== state.zoneIndex) continue;
+          const distance = player.position.distanceTo(enemy.position);
+          if (distance < 2.35) { triggerEncounter(enemy); return; }
+        }
+      }
+
+      function triggerEncounter(enemy) {
+        if (state.mode !== 'exploring' || state.battleActive) return;
+        console.log('Encounter enemy:', enemy?.userData?.stage?.enemy);
+        startBattle(enemy);
+      }
+
+      function startBattle(enemy) {
+        state.mode = 'battle'; state.battleActive = true; state.isInBattle = true; state.movementLocked = true; state.canMove = false; state.playerCanMove = false; state.answered = false; player.userData.moving = false; currentEnemy = enemy || enemies[state.zoneIndex];
+        const question = getNextQuestion();
+        console.log('Battle started');
+        console.log('START BATTLE', { enemy: currentEnemy?.userData?.stage?.enemy, question, totalQuestions: state.questionBank.length });
+        if (!question) {
+          state.battleActive = false; state.isInBattle = false; state.movementLocked = false; state.canMove = true; state.playerCanMove = true; state.mode = 'exploring'; state.currentQuestion = null;
+          showQuestionError('Không tải được bộ câu hỏi.');
+          console.error('Question unavailable while starting battle.', { questionBank: state.questionBank, questionsLoaded: state.questionsLoaded });
+          return;
+        }
+        updateChallengeHeader(); renderQuestion(question); worldToast(`${currentStage().enemy} xuất hiện! Hãy giải mã để tấn công.`);
+      }
+
+      function updateChallengeHeader() {
+        const enemy = currentEnemy || state.lastDefeatedEnemy; const stage = enemy?.enemyStage || currentStage(); const hp = enemy ? Math.max(0, Math.round(enemy.hp)) : 0; const max = enemy ? enemy.maxHp : 0;
+        els.enemyName.textContent = enemy && enemy.active ? stage.enemy : enemy ? 'Đã hạ gục' : 'Chưa chạm trán'; els.enemyState.textContent = state.mode === 'battle' ? 'Đang giao chiến' : enemy && enemy.defeated ? 'Cổng đã mở' : 'Đang khám phá'; els.enemyHpText.textContent = enemy ? `${hp} / ${max} HP` : '-- / -- HP'; els.enemyHpBar.style.width = `${max ? hp / max * 100 : 0}%`; els.enemyHpBar.classList.toggle('boss', Boolean(stage.boss));
+      }
+
+      function ensureQuestionPanelVisible() {
+        els.questionPanel.hidden = false; els.questionPanel.style.display = 'block'; els.questionPanel.style.visibility = 'visible'; els.questionPanel.style.opacity = '1'; els.questionPanel.style.pointerEvents = 'auto';
+      }
+
+      function showQuestionError(message = 'Không tải được bộ câu hỏi.') {
+        ensureQuestionPanelVisible(); els.questionNumber.textContent = 'Lỗi câu hỏi'; const error = document.createElement('div'); error.id = 'questionText'; error.className = 'panel-error'; error.textContent = `${message} Hãy kiểm tra ${QUESTION_PATH} rồi tải lại trang.`; els.questionContent.replaceChildren(error);
       }
 
       function shuffle(items) {
         const copy = [...items];
-        for (let i = copy.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [copy[i], copy[j]] = [copy[j], copy[i]]; }
+        for (let index = copy.length - 1; index > 0; index -= 1) {
+          const randomIndex = Math.floor(Math.random() * (index + 1));
+          [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
+        }
         return copy;
       }
 
-      function resetCharacterClasses() {
-        [els.playerCharacter, els.enemyCharacter].forEach((element) => {
-          element.classList.remove('attack', 'hurt', 'hit', 'defeat', 'walk');
-          element.classList.add('idle');
-        });
-      }
-
-      function setSceneMode(mode) {
-        const stage = stages[state.stageIndex];
-        els.scene.className = `scene stage-${stage.scene} ${mode === 'travel' ? 'traveling' : 'battle-ready scene-transition'}`;
-        if (mode === 'battle') {
-          void els.scene.offsetWidth;
-          els.scene.classList.add('scene-transition');
-        }
-      }
-
-      function renderTravelPanel() {
-        els.questionNumber.textContent = 'Đang di chuyển';
-        els.questionContent.innerHTML = '<div class="empty-question"><strong>Hãy sẵn sàng!</strong>Nhân vật đang băng qua con đường. Quái vật sẽ xuất hiện ngay sau đây.</div>';
-      }
-
-      function beginTravel() {
-        clearTimeout(state.travelTimer);
-        state.mode = 'travel';
-        resetCharacterClasses();
-        els.playerCharacter.classList.remove('idle');
-        els.playerCharacter.classList.add('walk');
-        setSceneMode('travel');
-        els.travelBanner.classList.remove('hidden', 'battle');
-        els.travelBannerIcon.textContent = stages[state.stageIndex].travelIcon;
-        els.travelLabel.textContent = 'Đang phiêu lưu';
-        els.travelMessage.textContent = `Đang tiến vào ${stages[state.stageIndex].name}…`;
-        els.questionPanel.classList.add('traveling');
-        renderTravelPanel();
-        const stageAtStart = state.stageIndex;
-        state.travelTimer = setTimeout(() => {
-          if (state.gameRunning && state.stageIndex === stageAtStart) enterBattle();
-        }, 1850);
-      }
-
-      function enterBattle() {
-        state.mode = 'battle';
-        resetCharacterClasses();
-        setSceneMode('battle');
-        els.travelBanner.classList.remove('hidden');
-        els.travelBanner.classList.add('battle');
-        els.travelBannerIcon.textContent = '⚔';
-        els.travelLabel.textContent = stages[state.stageIndex].boss ? 'BOSS BATTLE' : 'Chạm trán';
-        els.travelMessage.textContent = `${stages[state.stageIndex].enemy} chắn đường!`;
-        els.questionPanel.classList.remove('traveling');
-        getNextQuestion();
-      }
-
-      function startGame() {
-        const name = els.playerName.value.trim();
-        if (!state.questions.length) { showToast(state.questionError || `Chưa có câu hỏi. Kiểm tra ${QUESTION_PATH}.`, true); return; }
-        if (!name) { els.playerName.focus(); showToast('Hãy nhập tên người chơi để bắt đầu.', true); return; }
-        state.playerName = name;
-        state.playerHp = MAX_PLAYER_HP; state.score = 0; state.correct = 0; state.wrong = 0; state.stageIndex = 0;
-        state.questionOrder = shuffle(state.questions); state.questionIndex = 0; state.gameRunning = true;
-        showScreen(els.gameScreen); setupStage();
-      }
-
-      function setupStage() {
-        const stage = stages[state.stageIndex];
-        state.enemyHp = stage.hp;
-        els.areaKicker.textContent = stage.kicker;
-        els.areaTitle.textContent = stage.name;
-        els.sceneStageName.textContent = stage.name;
-        els.stageCount.textContent = `${stage.boss ? 'BOSS' : 'Kẻ địch'} · ${state.stageIndex + 1} / ${stages.length}`;
-        els.enemyName.textContent = stage.enemy;
-        els.enemyCharacter.textContent = stage.icon;
-        els.enemyCharacter.classList.toggle('boss', Boolean(stage.boss));
-        els.playerHudName.textContent = state.playerName;
-        els.battlePlayerName.textContent = state.playerName;
-        els.progressText.textContent = `Khu ${state.stageIndex + 1} / ${stages.length}`;
-        els.stageProgressBar.style.width = `${((state.stageIndex + 1) / stages.length) * 100}%`;
-        els.enemyHpBar.classList.toggle('boss', Boolean(stage.boss));
-        els.combatLog.textContent = stage.boss ? 'Byte Dragon xuất hiện. Đây là trận chiến cuối cùng!' : 'Băng qua khu vực và chuẩn bị đối đầu quái vật.';
-        updateHud();
-        beginTravel();
-      }
-
-      function updateHud() {
-        const playerPercent = Math.max(0, state.playerHp / MAX_PLAYER_HP * 100);
-        const enemyPercent = Math.max(0, state.enemyHp / stages[state.stageIndex].hp * 100);
-        els.playerHpText.textContent = `${state.playerHp} / ${MAX_PLAYER_HP} HP`;
-        els.playerHpBar.style.width = `${playerPercent}%`; els.scenePlayerHpBar.style.width = `${playerPercent}%`;
-        els.enemyHpBar.style.width = `${enemyPercent}%`;
-        els.scoreText.textContent = `${state.score} XP`;
-        els.questionStats.textContent = `${state.correct} đúng · ${state.wrong} sai`;
-      }
-
       function getNextQuestion() {
-        if (!state.gameRunning || state.mode !== 'battle') return;
-        if (!state.questionOrder.length || state.questionIndex >= state.questionOrder.length) {
-          state.questionOrder = shuffle(state.questions);
-          state.questionIndex = 0;
-        }
-        state.currentQuestion = state.questionOrder[state.questionIndex];
-        state.questionIndex += 1;
-        state.answered = false;
-        renderQuestion();
+        if (!state.questionsLoaded || !state.questionBank.length) return null;
+        if (!state.questionOrder.length || state.questionIndex >= state.questionOrder.length) { state.questionOrder = shuffle(state.questionBank); state.questionIndex = 0; }
+        const question = state.questionOrder[state.questionIndex]; state.questionIndex += 1; state.currentQuestion = question; state.answered = false; return question;
       }
 
-      function renderQuestion() {
-        const question = state.currentQuestion;
-        if (!question) return;
-        els.questionNumber.textContent = `Câu ${state.questionIndex}`;
-        const wrapper = document.createElement('div');
-        wrapper.className = 'question-content-wrap';
-        const questionText = document.createElement('p');
-        questionText.className = 'question-text'; questionText.textContent = question.question; wrapper.appendChild(questionText);
+      function renderTravelQuestion(message = 'Dùng WASD hoặc phím mũi tên để tìm quái vật trên bản đồ.') { ensureQuestionPanelVisible(); els.questionNumber.textContent = 'Đang khám phá'; const card = document.createElement('div'); card.id = 'questionText'; card.className = 'travel-card'; const title = document.createElement('strong'); title.textContent = state.defeated[state.zoneIndex] ? '🗝 Cổng đã mở' : '✦ Bản đồ đang chờ'; const copy = document.createElement('span'); copy.textContent = message; card.append(title, copy); const answerArea = document.createElement('div'); answerArea.id = 'answerArea'; els.questionContent.replaceChildren(card, answerArea); }
+
+      function renderQuestion(question = state.currentQuestion) {
+        ensureQuestionPanelVisible();
+        if (!question) { console.error('Question is undefined'); showQuestionError(); return; }
+        state.currentQuestion = question;
+        console.log('Question:', question, 'Panel:', document.getElementById('questionPanel'));
+        els.questionNumber.textContent = `Câu ${state.questionIndex} · ${question.type === 'multiple_choice' ? 'Chọn đáp án' : 'Điền đáp án'}`;
+        const wrapper = document.createElement('div'); wrapper.className = 'question-content-wrap';
+        const prompt = document.createElement('div'); prompt.id = 'questionText'; prompt.className = 'question-copy'; prompt.textContent = question.question; wrapper.appendChild(prompt);
         if (question.type === 'multiple_choice') {
-          const answers = document.createElement('div'); answers.className = 'answers';
-          question.choices.forEach((choice, index) => {
-            const letter = ['A', 'B', 'C', 'D'][index];
-            const button = document.createElement('button'); button.type = 'button'; button.className = 'answer-option'; button.dataset.answer = letter;
-            button.innerHTML = `<span class="choice-letter">${letter}</span><span></span>`; button.querySelector('span:last-child').textContent = choice;
-            button.addEventListener('click', () => { if (state.answered) return; answers.querySelectorAll('.answer-option').forEach((item) => item.classList.remove('selected')); button.classList.add('selected'); submitAnswer(letter, answers); });
-            answers.appendChild(button);
-          });
-          wrapper.appendChild(answers);
+          const answers = document.createElement('div'); answers.id = 'answerArea'; answers.className = 'answers';
+          const options = question.options || question.choices.reduce((result, choice, index) => { result[['A', 'B', 'C', 'D'][index]] = choice; return result; }, {});
+          ['A', 'B', 'C', 'D'].forEach((letter) => { const choice = options[letter]; const button = document.createElement('button'); button.type = 'button'; button.className = 'answer-option'; button.dataset.answer = letter; button.innerHTML = `<span class="choice-letter">${letter}</span><span></span>`; button.querySelector('span:last-child').textContent = choice; button.addEventListener('click', () => submitAnswer(letter, answers)); answers.appendChild(button); }); wrapper.appendChild(answers);
         } else {
-          const label = document.createElement('label'); label.className = 'fill-label'; label.textContent = 'Nhập đáp án để tấn công'; label.htmlFor = 'fillAnswer';
-          const input = document.createElement('input'); input.id = 'fillAnswer'; input.className = 'text-input'; input.placeholder = 'Gõ câu trả lời...'; input.autocomplete = 'off';
-          const actions = document.createElement('div'); actions.className = 'question-actions'; const submit = document.createElement('button'); submit.className = 'button'; submit.type = 'button'; submit.textContent = '⚔ Lao tới'; submit.addEventListener('click', () => submitAnswer(input.value, wrapper));
-          input.addEventListener('keydown', (event) => { if (event.key === 'Enter') submit.click(); });
-          actions.appendChild(submit); wrapper.append(label, input, actions);
+          const label = document.createElement('label'); label.className = 'fill-label'; label.textContent = 'Nhập đáp án để tấn công'; label.htmlFor = 'fillAnswer'; const input = document.createElement('input'); input.id = 'fillAnswer'; input.className = 'text-input'; input.placeholder = 'Gõ câu trả lời...'; input.autocomplete = 'off'; const actions = document.createElement('div'); actions.id = 'answerArea'; actions.className = 'question-actions'; const submit = document.createElement('button'); submit.type = 'button'; submit.className = 'button'; submit.textContent = '⚔ Tấn công'; submit.addEventListener('click', () => submitAnswer(input.value, wrapper)); input.addEventListener('keydown', (event) => { if (event.key === 'Enter') submit.click(); }); actions.appendChild(submit); wrapper.append(label, input, actions);
         }
-        const feedback = document.createElement('div'); feedback.id = 'feedback'; feedback.className = 'feedback'; feedback.textContent = 'Trả lời đúng để nhân vật lao tới và gây 20 damage.'; wrapper.appendChild(feedback);
-        els.questionContent.replaceChildren(wrapper);
+        const feedback = document.createElement('div'); feedback.id = 'feedback'; feedback.className = 'feedback'; feedback.textContent = 'Đúng: Player tấn công · Sai: Enemy phản công.'; wrapper.appendChild(feedback); els.questionContent.replaceChildren(wrapper); updateChallengeHeader();
       }
 
       function normalizeAnswer(value) { return String(value).trim().toLowerCase().replace(/\s+/g, ' '); }
-
-      function animateCharacter(element, animationClass) {
-        element.classList.remove('idle', 'attack', 'hurt', 'hit');
-        void element.offsetWidth;
-        element.classList.add(animationClass);
-        setTimeout(() => { element.classList.remove(animationClass); element.classList.add('idle'); }, 620);
-      }
-
-      function showDamage(value, target, playerDamage = false) {
-        const damage = document.createElement('span');
-        damage.className = `damage-text${playerDamage ? ' player-damage' : ''}`;
-        damage.textContent = value;
-        damage.style.left = target === 'enemy' ? `${67 + Math.random() * 8}%` : `${20 + Math.random() * 8}%`;
-        damage.style.top = `${38 + Math.random() * 8}%`;
-        els.scene.appendChild(damage);
-        setTimeout(() => damage.remove(), 950);
-      }
-
-      function showReward() {
-        const reward = document.createElement('span');
-        reward.className = 'reward-pop'; reward.textContent = '+100 XP ✦'; els.scene.appendChild(reward);
-        setTimeout(() => reward.remove(), 1100);
-      }
+      function markAnswerButtons(container, answer, correct) { if (!container || !container.querySelectorAll) return; container.querySelectorAll('.answer-option').forEach((button) => { button.disabled = true; if (button.dataset.answer === correct) button.classList.add('correct'); if (button.dataset.answer === answer && answer !== correct) button.classList.add('wrong'); }); }
 
       function submitAnswer(answer, answerContainer) {
-        if (state.answered || !state.currentQuestion || !state.gameRunning || state.mode !== 'battle') return;
-        const question = state.currentQuestion;
-        const isCorrect = question.type === 'multiple_choice' ? String(answer).toUpperCase() === question.answer : normalizeAnswer(answer) === normalizeAnswer(question.answer);
-        state.answered = true;
-        if (answerContainer && answerContainer.querySelectorAll) answerContainer.querySelectorAll('button, input').forEach((item) => { item.disabled = true; });
+        if (state.mode !== 'battle' || !state.battleActive || state.action || state.answered || !state.currentQuestion || !currentEnemy || currentEnemy.defeated || !currentEnemy.active) return;
+        const question = state.currentQuestion; const isCorrect = question.type === 'multiple_choice' ? String(answer).toUpperCase() === question.answer : normalizeAnswer(answer) === normalizeAnswer(question.answer); state.answered = true;
+        if (question.type === 'multiple_choice') markAnswerButtons(answerContainer, String(answer).toUpperCase(), question.answer); else if (answerContainer.querySelectorAll) answerContainer.querySelectorAll('input, button').forEach((item) => { item.disabled = true; });
         const feedback = $('feedback');
-        if (isCorrect) {
-          state.correct += 1; state.score += 100; state.enemyHp = Math.max(0, state.enemyHp - DAMAGE_TO_ENEMY);
-          feedback.className = 'feedback good'; feedback.textContent = `Chính xác! Nhân vật lao tới, gây ${DAMAGE_TO_ENEMY} damage.`;
-          animateCharacter(els.playerCharacter, 'attack'); animateCharacter(els.enemyCharacter, 'hurt'); showDamage(`-${DAMAGE_TO_ENEMY}`, 'enemy');
-          els.combatLog.textContent = `Đòn đánh trúng đích! ${stages[state.stageIndex].enemy} còn ${state.enemyHp} HP.`;
-        } else {
-          state.wrong += 1; state.score = Math.max(0, state.score - 25); state.playerHp = Math.max(0, state.playerHp - DAMAGE_TO_PLAYER);
-          feedback.className = 'feedback bad'; feedback.textContent = `Chưa đúng. Đáp án: ${question.answer}. Quái vật lao tới, bạn mất ${DAMAGE_TO_PLAYER} HP.`;
-          animateCharacter(els.enemyCharacter, 'attack'); animateCharacter(els.playerCharacter, 'hurt'); showDamage(`-${DAMAGE_TO_PLAYER} HP`, 'player', true);
-          els.combatLog.textContent = `Quái vật phản công! Bạn còn ${state.playerHp} HP.`;
-        }
+        if (isCorrect) { state.correct += 1; state.score += 100; state.isAttacking = true; state.isHurt = false; feedback.className = 'feedback good'; feedback.textContent = `✓ Chính xác! Player lao tới, gây ${DAMAGE_TO_ENEMY} damage.`; state.action = { type: 'playerAttack', elapsed: 0, duration: 1.15, damageApplied: false, start: player.position.clone(), target: attackPosition(player, currentEnemy) }; }
+        else { state.wrong += 1; state.score = Math.max(0, state.score - 25); state.isAttacking = false; state.isHurt = true; feedback.className = 'feedback bad'; feedback.textContent = `✕ Chưa đúng. Đáp án: ${question.answer}. Enemy lao tới, bạn mất ${DAMAGE_TO_PLAYER} HP.`; state.action = { type: 'enemyAttack', elapsed: 0, duration: 1.1, damageApplied: false, start: currentEnemy.position.clone(), target: enemyAttackPosition(currentEnemy, player) }; }
         updateHud();
-        if (state.playerHp <= 0) { setTimeout(() => finishGame(false), 760); return; }
-        if (state.enemyHp <= 0) {
-          els.enemyCharacter.classList.remove('idle', 'hurt'); els.enemyCharacter.classList.add('defeat'); showReward();
-          els.combatLog.textContent = `${stages[state.stageIndex].enemy} đã bị đánh bại! Nhân vật tiếp tục lên đường.`;
-          setTimeout(() => advanceStage(), 900); return;
+      }
+
+      function attackPosition(attacker, target) { const point = target.position.clone(); point.x += attacker.position.x < target.position.x ? -1.55 : 1.55; point.z = target.position.z; return point; }
+      function enemyAttackPosition(attacker, target) { const point = target.position.clone(); const direction = new THREE.Vector3().subVectors(point, attacker.position).normalize(); return point.clone().sub(direction.multiplyScalar(1.1)); }
+
+      function animatePartFlash(group, red = true) { group.userData.flashUntil = performance.now() + 440; group.userData.parts.forEach((part) => { if (part.material && part.material.color) part.material.color.set(red ? 0xff5d6c : currentStage().color); }); setTimeout(() => restorePartColors(group), 470); }
+      function restorePartColors(group) { if (!group || !group.userData.parts) return; const colors = group.userData.baseColors || group.userData.parts.map(() => 0x4e7bf2); group.userData.parts.forEach((part, index) => { if (part.material && part.material.color) part.material.color.set(colors[index]); }); }
+
+      function updateAction(dt) {
+        const action = state.action; if (!action) return; action.elapsed += dt; const t = Math.min(1, action.elapsed / action.duration); const attacker = action.type === 'playerAttack' ? player : currentEnemy; const target = action.type === 'playerAttack' ? currentEnemy : player;
+        if (action.type === 'playerAttack') {
+          if (t < .42) { player.position.lerpVectors(action.start, action.target, t / .42); player.rotation.y = Math.atan2(currentEnemy.position.x - player.position.x, currentEnemy.position.z - player.position.z); player.userData.sword.rotation.z = -.62 - Math.sin(t * Math.PI * 2) * 1.8; }
+          else if (!action.damageApplied) { action.damageApplied = true; currentEnemy.hp = Math.max(0, currentEnemy.hp - DAMAGE_TO_ENEMY); animatePartFlash(currentEnemy); showFloating(`-${DAMAGE_TO_ENEMY} HP`, currentEnemy.position, false); updateEnemyHpBar(currentEnemy); updateChallengeHeader(); }
+          else if (t < .74) { player.userData.sword.rotation.z = -.62 + Math.sin(t * 18) * .16; }
+          else { player.position.lerpVectors(action.target, action.start, (t - .74) / .26); }
+        } else {
+          if (t < .42) { currentEnemy.position.lerpVectors(action.start, action.target, t / .42); }
+          else if (!action.damageApplied) { action.damageApplied = true; state.playerHp = Math.max(0, state.playerHp - DAMAGE_TO_PLAYER); animatePartFlash(player); showFloating(`-${DAMAGE_TO_PLAYER} HP`, player.position, true); updateHud(); }
+          else if (t >= .64) currentEnemy.position.lerpVectors(action.target, action.start, (t - .64) / .36);
         }
-        const nextButton = document.createElement('button'); nextButton.type = 'button'; nextButton.className = 'button'; nextButton.textContent = 'Câu tiếp theo →'; nextButton.addEventListener('click', getNextQuestion);
-        const actions = document.createElement('div'); actions.className = 'question-actions'; actions.appendChild(nextButton); $('feedback').after(actions);
+        if (t >= 1) finishAction();
       }
 
-      function advanceStage() {
-        if (state.stageIndex >= stages.length - 1) { finishGame(true); return; }
-        state.stageIndex += 1; setupStage();
+      function finishAction() {
+        const wasEnemyAttack = state.action && state.action.type === 'enemyAttack'; const enemy = currentEnemy; state.action = null; state.isAttacking = false; state.isHurt = false; player.userData.sword.rotation.z = -.62; if (enemy) enemy.position.copy(enemy.userData.home); player.position.y = 0;
+        if (state.playerHp <= 0) { finishGame(false); return; }
+        if (enemy && enemy.hp <= 0) { defeatEnemy(enemy); return; }
+        state.mode = 'battle'; state.battleActive = true; state.isInBattle = true; state.movementLocked = true; state.canMove = false; state.playerCanMove = false; state.answered = false; const nextQuestion = getNextQuestion(); if (wasEnemyAttack) worldToast('Enemy đã quay lại vị trí. Hãy thử câu tiếp theo.'); if (nextQuestion) renderQuestion(nextQuestion); else { state.battleActive = false; state.isInBattle = false; state.movementLocked = false; state.canMove = true; state.playerCanMove = true; state.mode = 'exploring'; showQuestionError(); console.error('No next question after battle action.'); }
       }
 
-      function loadLeaderboard() {
-        try { const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); return Array.isArray(data) ? data : []; }
-        catch (error) { return []; }
+      function defeatEnemy(enemy) {
+        if (!enemy || enemy.defeated) return;
+        const defeatedIndex = enemy.userData.index; enemy.hp = 0; enemy.defeated = true; enemy.active = false; enemy.colliderEnabled = false; enemy.userData.alive = false; enemy.userData.death = 0; enemy.visible = true;
+        activeEnemies = activeEnemies.filter((activeEnemy) => activeEnemy !== enemy); encounterTargets = encounterTargets.filter((target) => target !== enemy); enemyColliders = enemyColliders.filter((collider) => collider.enemy !== enemy); obstacles = obstacles.filter((obstacle) => obstacle.owner !== enemy && obstacle.enemy !== enemy);
+        const away = new THREE.Vector3().subVectors(player.position, enemy.position).setY(0); if (away.lengthSq() < 0.01) away.set(0, 0, 1); away.normalize(); player.position.add(away.multiplyScalar(1.5));
+        state.defeated[defeatedIndex] = true; state.lastDefeatedEnemy = enemy; state.battleActive = false; state.isInBattle = false; state.isAttacking = false; state.isHurt = false; state.movementLocked = false; state.canMove = true; state.playerCanMove = true; state.currentQuestion = null; state.answered = false; state.action = null; state.mode = 'exploring'; currentEnemy = null; clearKeys(); state.score += 100;
+        unlockGate(defeatedIndex); updateEnemyHpBar(enemy); updateHud(); showFloating('+100 SCORE · +20 EXP', enemy.position, false); renderTravelQuestion(defeatedIndex === stages.length - 1 ? 'Boss đã bị đánh bại. Chuẩn bị nhận phần thưởng!' : 'Quái vật đã biến mất. Tiếp tục đi tới cánh cổng tiếp theo.');
+        console.log('ENEMY DEFEATED', { name: enemy.name, hp: enemy.hp, defeated: enemy.defeated, battleActive: state.battleActive, gameState: state.mode, movementLocked: state.movementLocked, playerCanMove: state.playerCanMove, isInBattle: state.isInBattle });
+        setTimeout(() => { enemy.visible = false; }, 650);
+        if (defeatedIndex === stages.length - 1) setTimeout(() => finishGame(true), 850);
       }
 
-      function saveResult() {
-        const total = state.correct + state.wrong;
-        const result = { name: state.playerName, score: state.score, correct: state.correct, wrong: state.wrong, accuracy: total ? Math.round(state.correct / total * 100) : 0, date: Date.now() };
-        const leaderboard = [...loadLeaderboard(), result].sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || b.correct - a.correct || a.date - b.date).slice(0, 10);
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(leaderboard)); } catch (error) { /* localStorage có thể bị chặn trong chế độ riêng tư. */ }
+      function unlockGate(index) { const gate = gates[index]; if (!gate) { if (index === stages.length - 1) worldToast('Lâu đài đã sụp đổ!'); return; } gate.open = true; gate.colliderEnabled = false; worldToast('🔓 Cổng đã mở. Tiếp tục hành trình!'); }
+
+      function showFloating(text, objectOrPosition, playerDamage) {
+        const element = document.createElement('div'); element.className = `world-floating${playerDamage ? ' player-damage' : ''}`; element.textContent = text; els.worldPanel.appendChild(element);
+        const isObject3D = Boolean(objectOrPosition && objectOrPosition.position && typeof objectOrPosition.position.clone === 'function');
+        const object = isObject3D ? objectOrPosition : null;
+        const basePosition = isObject3D ? null : (objectOrPosition && typeof objectOrPosition.clone === 'function' ? objectOrPosition.clone() : new THREE.Vector3());
+        effects.push({ element, object, basePosition, age: 0, offset: new THREE.Vector3(0, object === player ? 2.7 : 3.1, 0) });
+      }
+      function updateEffects(dt) {
+        effects = effects.filter((effect) => {
+          effect.age += dt;
+          const anchor = effect.object && effect.object.position && typeof effect.object.position.clone === 'function' ? effect.object.position.clone() : (effect.basePosition ? effect.basePosition.clone() : null);
+          if (!anchor) { effect.element.remove(); return false; }
+          const projected = projectToWorld(anchor.add(effect.offset));
+          if (projected) { effect.element.style.left = `${projected.x}px`; effect.element.style.top = `${projected.y}px`; }
+          if (effect.age > 1.05) { effect.element.remove(); return false; }
+          return true;
+        });
+      }
+      function projectToWorld(position) { const rect = els.canvas.getBoundingClientRect(); const point = position.clone().project(camera); if (point.z < -1 || point.z > 1) return null; return { x: (point.x * .5 + .5) * rect.width, y: (-point.y * .5 + .5) * rect.height }; }
+
+      function updateEnemies(time, dt) {
+        enemies.forEach((enemy) => {
+          const data = enemy.userData; if (data.death !== null) { data.death += dt; enemy.scale.multiplyScalar(Math.max(.001, 1 - dt * 1.65)); enemy.rotation.z += dt * 2; enemy.traverse((child) => { if (child.material) { child.material.transparent = true; child.material.opacity = Math.max(0, 1 - data.death); } }); return; }
+          if (!enemy.active) return; enemy.position.y = Math.sin(time * 2.5 + data.index) * .08; enemy.rotation.y += dt * (data.stage.boss ? .3 : .55); if (data.stage.boss) { const raging = enemy.hp < enemy.maxHp * .5; enemy.scale.setScalar(1.6 + (raging ? Math.sin(time * 8) * .05 : 0)); data.parts.forEach((part) => { if (part.material && part.material.emissive) { part.material.emissive.set(raging ? 0x8c173c : 0x000000); part.material.emissiveIntensity = raging ? 1.8 : 0; } }); } if (data.flashUntil && performance.now() > data.flashUntil) { restoreEnemyColors(enemy); data.flashUntil = 0; }
+        });
+      }
+      function restoreEnemyColors(enemy) { enemy.userData.parts.forEach((part) => { if (part.material && part.material.color) part.material.color.set(enemy.userData.stage.color); }); }
+
+      function updateGates(dt) { gates.forEach((gate) => { if (!gate.open || gate.progress >= 1) return; gate.progress = Math.min(1, gate.progress + dt * 1.7); gate.left.position.z = -3.15 - gate.progress * 1.9; gate.right.position.z = 3.15 + gate.progress * 1.9; gate.group.children[2].position.y = 4.55 + gate.progress * 1.2; }); }
+      function updateCamera(dt) { const inBattle = state.mode === 'battle' || state.action; const zoom = inBattle ? 10.8 : 14.6; const desired = player.position.clone().add(new THREE.Vector3(0, zoom, zoom)); const focus = inBattle && currentEnemy ? player.position.clone().lerp(currentEnemy.position, .35) : player.position; camera.position.lerp(desired, Math.min(1, dt * 4)); cameraLookAt.lerp(focus, Math.min(1, dt * 5)); camera.lookAt(cameraLookAt.x, cameraLookAt.y, cameraLookAt.z); }
+
+      function updateEnemyHpBar(enemy) {
+        if (!enemy || enemy.defeated || !enemy.active) { els.worldEnemyHud.classList.add('hidden'); return; }
+        const percent = Math.max(0, enemy.hp) / enemy.maxHp * 100; els.worldEnemyBar.style.width = `${percent}%`; els.worldEnemyHp.textContent = `${Math.max(0, enemy.hp)} / ${enemy.maxHp}`;
       }
 
-      function renderLeaderboard() {
-        const leaderboard = loadLeaderboard();
-        if (!leaderboard.length) { els.leaderboardContent.innerHTML = '<div class="empty-leaderboard">Chưa có thành tích nào. Hãy là người đầu tiên!</div>'; return; }
-        const table = document.createElement('table'); table.innerHTML = '<thead><tr><th>Rank</th><th>Tên</th><th>Điểm</th><th>Đúng</th><th>Sai</th><th>Accuracy</th></tr></thead>';
-        const body = document.createElement('tbody');
-        leaderboard.forEach((entry, index) => { const row = document.createElement('tr'); [index + 1, entry.name, `${entry.score} XP`, entry.correct, entry.wrong, `${entry.accuracy}%`].forEach((value) => { const cell = document.createElement('td'); cell.textContent = value; row.appendChild(cell); }); body.appendChild(row); });
-        table.appendChild(body); const wrap = document.createElement('div'); wrap.className = 'table-wrap'; wrap.appendChild(table); els.leaderboardContent.replaceChildren(wrap);
+      function updateEnemyOverlay() {
+        if (!currentEnemy || currentEnemy.defeated || !currentEnemy.active) { els.worldEnemyHud.classList.add('hidden'); return; }
+        const projected = projectToWorld(currentEnemy.position.clone().add(new THREE.Vector3(0, currentEnemy.enemyStage.boss ? 5 : 3.2, 0))); if (!projected) { els.worldEnemyHud.classList.add('hidden'); return; }
+        els.worldEnemyHud.classList.remove('hidden'); els.worldEnemyHud.style.left = `${projected.x}px`; els.worldEnemyHud.style.top = `${projected.y}px`; els.worldEnemyName.textContent = currentEnemy.name.toUpperCase(); updateEnemyHpBar(currentEnemy); els.worldEnemyBar.classList.toggle('boss', Boolean(currentEnemy.enemyStage.boss));
       }
 
-      function launchConfetti() {
-        els.confetti.replaceChildren();
-        const colors = ['#ffc857', '#63e6be', '#8e73ff', '#ff6b7a', '#61b9ff'];
-        for (let i = 0; i < 42; i += 1) {
-          const piece = document.createElement('span'); piece.className = 'confetti-piece';
-          piece.style.left = `${Math.random() * 100}%`; piece.style.background = colors[i % colors.length];
-          piece.style.setProperty('--drift', `${-120 + Math.random() * 240}px`); piece.style.animationDelay = `${Math.random() * .45}s`;
-          els.confetti.appendChild(piece);
-        }
-        setTimeout(() => els.confetti.replaceChildren(), 3600);
-      }
+      function updateHud() { const stage = currentStage(); const playerPercent = Math.max(0, state.playerHp / MAX_PLAYER_HP * 100); els.hudPlayerName.textContent = state.playerName || 'PLAYER'; els.playerHpText.textContent = `${state.playerHp} / ${MAX_PLAYER_HP} HP`; els.playerHpBar.style.width = `${playerPercent}%`; els.zoneText.textContent = stage.shortName; els.stageText.textContent = `${state.zoneIndex + 1} / ${stages.length}`; els.statsText.textContent = `${state.correct} đúng · ${state.wrong} sai`; els.scoreText.textContent = `${state.score} XP`; els.progressText.textContent = stage.scene.toUpperCase(); els.progressBar.style.width = `${(state.zoneIndex + (state.defeated[state.zoneIndex] ? 1 : .35)) / stages.length * 100}%`; updateChallengeHeader(); }
 
-      function finishGame(won) {
-        clearTimeout(state.travelTimer); state.gameRunning = false; state.mode = 'result';
-        if (won) { state.score += 500; els.resultMessage.textContent = 'Bạn đã hạ gục Byte Dragon và hoàn thành chuyến phiêu lưu Python!'; launchConfetti(); }
-        else { els.resultMessage.textContent = 'Bạn đã cạn HP. Hãy xem lại câu sai và thử lại nhé!'; els.confetti.replaceChildren(); }
-        saveResult();
-        const total = state.correct + state.wrong; const accuracy = total ? Math.round(state.correct / total * 100) : 0;
-        els.finalName.textContent = state.playerName; els.finalScore.innerHTML = `${state.score} <small>XP</small>`; els.finalAccuracy.textContent = `${accuracy}%`; els.finalCorrect.textContent = state.correct; els.finalWrong.textContent = state.wrong;
-        renderLeaderboard(); showScreen(els.resultScreen);
-      }
+      function loop() { requestAnimationFrame(loop); if (!renderer) return; const dt = Math.min(clock.getDelta(), .05); const time = performance.now() / 1000; updateMovement(dt); if (state.action) updateAction(dt); updatePlayerPose(time); updateEnemies(time, dt); updateGates(dt); updateCamera(dt); updateEffects(dt); updateEnemyOverlay(); renderer.render(scene, camera); }
 
-      function replay(switchPlayer = false) {
-        if (switchPlayer) { els.playerName.value = ''; showScreen(els.startScreen); els.playerName.focus(); return; }
-        startGame();
-      }
+      function loadLeaderboard() { try { const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); return Array.isArray(data) ? data : []; } catch (error) { return []; } }
+      function saveResult() { const total = state.correct + state.wrong; const result = { name: state.playerName, score: state.score, correct: state.correct, wrong: state.wrong, accuracy: total ? Math.round(state.correct / total * 100) : 0, date: Date.now() }; const leaderboard = [...loadLeaderboard(), result].sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || b.correct - a.correct || a.date - b.date).slice(0, 10); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(leaderboard)); } catch (error) { /* localStorage có thể bị chặn. */ } }
+      function renderLeaderboard() { const leaderboard = loadLeaderboard(); if (!leaderboard.length) { els.leaderboardContent.innerHTML = '<div class="empty-leaderboard">Chưa có thành tích nào.</div>'; return; } const table = document.createElement('table'); table.innerHTML = '<thead><tr><th>Rank</th><th>Tên</th><th>Điểm</th><th>Đúng</th><th>Sai</th><th>Accuracy</th></tr></thead>'; const body = document.createElement('tbody'); leaderboard.forEach((entry, index) => { const row = document.createElement('tr'); [index + 1, entry.name, `${entry.score} XP`, entry.correct, entry.wrong, `${entry.accuracy}%`].forEach((value) => { const cell = document.createElement('td'); cell.textContent = value; row.appendChild(cell); }); body.appendChild(row); }); table.appendChild(body); const wrap = document.createElement('div'); wrap.className = 'table-wrap'; wrap.appendChild(table); els.leaderboardContent.replaceChildren(wrap); }
 
-      els.startButton.disabled = true;
-      els.startButton.addEventListener('click', startGame);
-      els.playerName.addEventListener('keydown', (event) => { if (event.key === 'Enter') startGame(); });
-      els.playAgainButton.addEventListener('click', () => replay(false));
-      els.newPlayerButton.addEventListener('click', () => replay(true));
+      function launchConfetti() { els.confetti.replaceChildren(); const colors = ['#ffd166', '#61e5b0', '#6ce6ff', '#a78bfa', '#ff6b7a']; for (let i = 0; i < 44; i += 1) { const piece = document.createElement('span'); piece.className = 'confetti-piece'; piece.style.left = `${Math.random() * 100}%`; piece.style.background = colors[i % colors.length]; piece.style.setProperty('--drift', `${-130 + Math.random() * 260}px`); piece.style.animationDelay = `${Math.random() * .35}s`; els.confetti.appendChild(piece); } setTimeout(() => els.confetti.replaceChildren(), 3800); }
+      function finishGame(won) { state.gameRunning = false; state.mode = 'result'; state.battleActive = false; state.isInBattle = false; state.isAttacking = false; state.isHurt = false; state.movementLocked = false; state.canMove = false; state.playerCanMove = false; clearKeys(); if (won) { state.score += 500; els.resultMessage.textContent = 'Byte Dragon đã gục ngã. Bạn đã hoàn thành hành trình Python!'; launchConfetti(); } else { els.resultMessage.textContent = 'Bạn đã cạn HP. Hãy xem lại câu sai và thử lại!'; els.confetti.replaceChildren(); } saveResult(); const total = state.correct + state.wrong; const accuracy = total ? Math.round(state.correct / total * 100) : 0; els.finalName.textContent = state.playerName; els.finalScore.innerHTML = `${state.score} <small>XP</small>`; els.finalAccuracy.textContent = `${accuracy}%`; els.finalCorrect.textContent = state.correct; els.finalWrong.textContent = state.wrong; renderLeaderboard(); showScreen(els.resultScreen); }
+
+      function resetGame() { state.playerHp = MAX_PLAYER_HP; state.score = 0; state.correct = 0; state.wrong = 0; state.zoneIndex = 0; state.defeated = [false, false, false, false]; state.lastDefeatedEnemy = null; state.questionOrder = shuffle(state.questionBank); state.questionIndex = 0; state.currentQuestion = null; state.action = null; state.mode = 'exploring'; state.battleActive = false; state.isInBattle = false; state.isAttacking = false; state.isHurt = false; state.movementLocked = false; state.canMove = true; state.playerCanMove = true; state.answered = false; clearKeys(); activeEnemies = [...enemies]; encounterTargets = [...enemies]; enemyColliders = enemies.map((enemy) => enemy.collider); enemies.forEach((enemy, index) => { enemy.visible = true; enemy.scale.setScalar(stages[index].boss ? 1.6 : 1); enemy.position.copy(enemy.homePosition); enemy.hp = enemy.maxHp; enemy.defeated = false; enemy.active = true; enemy.colliderEnabled = true; enemy.userData.alive = true; enemy.userData.death = null; restorePartColors(enemy); enemy.userData.parts.forEach((part) => { if (part.material) { part.material.transparent = false; part.material.opacity = 1; } }); }); obstacles = obstacles.filter((obstacle) => !obstacle.enemy && !obstacle.owner?.enemyStage); gates.forEach((gate) => { gate.open = false; gate.colliderEnabled = true; gate.progress = 0; gate.left.position.z = -3.15; gate.right.position.z = 3.15; gate.group.children[2].position.y = 4.55; }); player.position.set(-29, 0, 0); restorePartColors(player); currentEnemy = enemies[0]; updateHud(); renderTravelQuestion('Dùng WASD hoặc phím mũi tên để tìm Slime trong Rừng.'); showZoneBanner('RỪNG SƯƠNG MÃ'); }
+      function startGame() { const name = els.playerName.value.trim(); if (!state.questionsLoaded || !state.threeReady) { showToast(state.questionError || 'Game chưa tải xong. Kiểm tra questions/k40.txt và Three.js.', true); return; } if (!name) { els.playerName.focus(); showToast('Hãy nhập tên người chơi.', true); return; } state.playerName = name; state.gameRunning = true; state.mode = 'exploring'; state.battleActive = false; showScreen(els.gameScreen); resize(); resetGame(); worldToast('Bắt đầu hành trình. Tìm Slime trên bản đồ!'); }
+      function replay(changePlayer = false) { if (changePlayer) { els.playerName.value = ''; showScreen(els.startScreen); els.playerName.focus(); return; } startGame(); }
+
+      els.startButton.addEventListener('click', startGame); els.playerName.addEventListener('keydown', (event) => { if (event.key === 'Enter' && !els.startButton.disabled) startGame(); }); els.playAgainButton.addEventListener('click', () => replay(false)); els.newPlayerButton.addEventListener('click', () => replay(true));
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keyup', onKeyUp);
+      try { initThree(); } catch (error) { console.error(error); showToast('Không thể khởi tạo bản đồ 3D trên trình duyệt này.', true); }
       loadQuestions();
     })();
   </script>
